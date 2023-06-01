@@ -10,7 +10,7 @@
 		{
 		"content-type" : "email / password / phone",
 		"input_type" : "text / number ",
-		"length" : [0 , 10]
+		"length" : [5 , 10]
 		}
 	
 	 }
@@ -27,7 +27,7 @@
 			{
 			"content-type" : "email / password / phone",
 			"input_type" : "text / number ",
-			"length" : [0 , 10]
+			"length" : [5, 10]
 			}
 	
 	 }

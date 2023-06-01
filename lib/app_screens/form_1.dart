@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:test2/app_constants/constants.dart';
+import 'package:test2/common_utilities/common_widgets.dart';
 import 'package:test2/models/checkBoxModel.dart';
 import 'package:test2/models/radio_model.dart';
 import 'package:test2/models/short_text_model.dart';
@@ -24,12 +24,32 @@ class _UserFormState extends State<UserForm> {
   late List<List<bool>?> checkBoxValue;
   late List<String?> editTexts;
 
+  final _formKey = GlobalKey<FormState>();
+
   Widget buildShortText(int idx)
   {
     ShortTextModel shortTextModel = ShortTextModel.fromJson(jsonDecode(responseTxt!)['fields'].elementAt(idx)["ob"]);
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: TextFormField(
+        validator: (val){
+           if(shortTextModel.validation!.length!.first > -1 && shortTextModel.validation!.length!.last > -1 )
+            {
+              return val!.length < shortTextModel.validation!.length!.first  || val.length > shortTextModel.validation!.length!.last
+                  ? "Please enter valid data" : null;
+            }
+            if(shortTextModel.validation!.length!.last > -1)
+            {
+              print("-- ${shortTextModel.validation!.length!.last} - ${val!.length}");
+              return val.length < shortTextModel.validation!.length!.first ? "Min ${shortTextModel.validation!.length!.first} characters required !" : null;
+            }
+            if(shortTextModel.validation!.length!.last > -1)
+            {
+              print("-- ${shortTextModel.validation!.length!.last} - ${val!.length}");
+              return val.length > shortTextModel.validation!.length!.last ? "Max ${shortTextModel.validation!.length!.last} characters required !" : null;
+            }
+          return null;
+        } ,
         decoration: InputDecoration(
           label: Text(shortTextModel.label!)
         ),
@@ -42,7 +62,6 @@ class _UserFormState extends State<UserForm> {
 
   Widget buildRadio(int idx)
   {
-    print(jsonDecode(responseTxt!)['fields'].elementAt(idx)["ob"]);
     RadioModel radioModel = RadioModel.fromJson(jsonDecode(responseTxt!)['fields'].elementAt(idx)["ob"]);
 
     return Row(
@@ -50,9 +69,14 @@ class _UserFormState extends State<UserForm> {
         for(int i = 0 ; i < radioModel.values!.length ; i++)
           Row(
             children: [
-              Radio(value: radioModel.values!.elementAt(i), groupValue: groupValue.elementAt(idx), onChanged: (value){
+              Radio(
+                  toggleable: true,
+                  value: radioModel.values!.elementAt(i), groupValue: groupValue.elementAt(idx), onChanged: (value){
+                    if(value == null)
+                      {
+                        log("-  now NULL ");
+                      }
                   setState(() {
-                    print("Hi");
                     groupValue[idx] = value.toString();
                   });
               }),
@@ -65,7 +89,6 @@ class _UserFormState extends State<UserForm> {
 
   Widget buildCheckBox(int idx)
   {
-    print(jsonDecode(responseTxt!)['fields'].elementAt(idx)["ob"]);
     CheckBoxModel checkBoxModel = CheckBoxModel.fromJson(jsonDecode(responseTxt!)['fields'].elementAt(idx)["ob"]);
 
 
@@ -100,7 +123,7 @@ class _UserFormState extends State<UserForm> {
     uiModel.fields!.forEach((element) {
        if(element.type == Constants.radio)
          {
-           groupValue.insert(element.id!, null);
+           groupValue.insert(element.id!, "null");
          }
        else if(element.type == Constants.checkBox)
        {
@@ -121,50 +144,65 @@ class _UserFormState extends State<UserForm> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: responseTxt == null ? Container() : SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.max,
-          children: [
-            ListView.builder(
-              shrinkWrap: true,
-                itemCount: uiModel.fields!.length,
-                itemBuilder: (ctx , i){
-                  switch(uiModel.fields!.elementAt(i).type)
-                  {
-                    case Constants.shortText : return buildShortText(i);
-                    case Constants.radio : return buildRadio(i);
-                    case Constants.checkBox : return buildCheckBox(i);
-                    default : return Container();
-                  }
-                }),
-            ElevatedButton(onPressed: (){
-              print("hi!!!");
-              for(int i= 0; i <uiModel.fields!.length ; i++)
-                {
-                  switch(uiModel.fields!.elementAt(i).type)
-                  {
-                    case Constants.shortText : {
-                      log("-- ${editTexts.elementAt(i)}");
+    return Form(
+      key: _formKey,
+      child: Scaffold(
+        body: responseTxt == null ? Container() : SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.max,
+            children: [
+              ListView.builder(
+                shrinkWrap: true,
+                  itemCount: uiModel.fields!.length,
+                  itemBuilder: (ctx , i){
+                    switch(uiModel.fields!.elementAt(i).type)
+                    {
+                      case Constants.shortText : return buildShortText(i);
+                      case Constants.radio : return buildRadio(i);
+                      case Constants.checkBox : return buildCheckBox(i);
+                      default : return Container();
                     }
-                    break;
-                    case Constants.radio : {
-                       if(groupValue[i] != null)
-                         {
-                           log(groupValue[i].toString());
-                         }
-                    }
-                    break;
-                    case Constants.checkBox : {
-                       log(checkBoxValue.elementAt(i).toString());
-                    };
-                    default : log("");
-                  }
-                }
+                  }),
+              ElevatedButton(onPressed: (){
+                if(_formKey.currentState!.validate())
+                  {
+                    for(int i= 0; i <uiModel.fields!.length ; i++)
+                    {
+                      log("- ${uiModel.fields!.elementAt(i).type}");
+                      switch(uiModel.fields!.elementAt(i).type)
+                      {
+                        case Constants.shortText : {
+                          log("Text is ${editTexts.elementAt(i)}");
+                        }
+                        break;
+                        case Constants.radio : {
 
-            }, child: Text("Submit"))
-          ],
-        ),
-      ));
+                          RadioModel radioModel = RadioModel.fromJson(jsonDecode(responseTxt!)['fields'].elementAt(i)["ob"]);
+                          if(radioModel.validation!.isMandatory != null && radioModel.validation!.isMandatory!)
+                            {
+                              if(groupValue[i] == "null")
+                              {
+                                  CommonWidgets.showToast("Please select item !");
+                              }
+                              else
+                                {
+                                  log("Radio is ${groupValue[i]}");
+                                }
+                            }
+                        }
+                        break;
+                        case Constants.checkBox : {
+                          log("chckbox ${checkBoxValue.elementAt(i).toString()}");
+                        }
+                        break;
+                        default : log("");
+                      }
+                    }
+                  }
+              }, child: Text("Submit"))
+            ],
+          ),
+        )),
+    );
   }
 }
