@@ -4,4 +4,5 @@ class Constants
   static const longText = "long_text";
   static const radio = "radio";
   static const checkBox = "checkBox";
+  static const dropDown = "dropDown";
 }

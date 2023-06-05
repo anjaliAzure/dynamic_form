@@ -5,6 +5,7 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:test2/app_constants/constants.dart';
 import 'package:test2/common_utilities/common_widgets.dart';
 import 'package:test2/models/checkBoxModel.dart';
+import 'package:test2/models/dropdown_model.dart';
 import 'package:test2/models/radio_model.dart';
 import 'package:test2/models/short_text_model.dart';
 import 'package:test2/models/ui_model.dart';
@@ -20,7 +21,9 @@ class _UserFormState extends State<UserForm> {
 
   String? responseTxt;
   late UiModel uiModel;
-  late List<String?> groupValue ;
+  late List<String?> groupValue;
+  late List<bool?> radioVisible,checkBoxVisible,dropDownVisible;
+  late List<String?> dropDownValue;
   late List<List<bool>?> checkBoxValue;
   late List<String?> editTexts;
 
@@ -33,22 +36,40 @@ class _UserFormState extends State<UserForm> {
       padding: const EdgeInsets.all(8.0),
       child: TextFormField(
         validator: (val){
-           if(shortTextModel.validation!.length!.first > -1 && shortTextModel.validation!.length!.last > -1 )
-            {
-              return val!.length < shortTextModel.validation!.length!.first  || val.length > shortTextModel.validation!.length!.last
-                  ? "Please enter valid data" : null;
+          if(shortTextModel.validation!.length!.first > -1){
+            if(val!.isEmpty){
+              return "Please Enter Data";
             }
-            if(shortTextModel.validation!.length!.last > -1)
-            {
-              print("-- ${shortTextModel.validation!.length!.last} - ${val!.length}");
-              return val.length < shortTextModel.validation!.length!.first ? "Min ${shortTextModel.validation!.length!.first} characters required !" : null;
+            else if(shortTextModel.validation!.length!.first > val.length || shortTextModel.validation!.length!.last < val.length){
+              return "Please Enter Value Between ${shortTextModel.validation!.length!.first} to ${shortTextModel.validation!.length!.last}";
             }
-            if(shortTextModel.validation!.length!.last > -1)
-            {
-              print("-- ${shortTextModel.validation!.length!.last} - ${val!.length}");
-              return val.length > shortTextModel.validation!.length!.last ? "Max ${shortTextModel.validation!.length!.last} characters required !" : null;
+            else{
+              return null;
             }
-          return null;
+          }
+          else{
+            if(shortTextModel.validation!.length!.last > -1 && shortTextModel.validation!.length!.last < val!.length){
+              return "Max ${shortTextModel.validation!.length!.last} characters required !";
+            }
+            else{
+              return null;
+            }
+          }
+           // if(shortTextModel.validation!.length!.first > -1 && shortTextModel.validation!.length!.last > -1 )
+           //  {
+           //    return val!.length < shortTextModel.validation!.length!.first  || val.length > shortTextModel.validation!.length!.last
+           //        ? "Please enter valid data" : null;
+           //  }
+           //   if(shortTextModel.validation!.length!.first > -1)
+           //  {
+           //    print("-- ${shortTextModel.validation!.length!.first} - ${val!.length}");
+           //    return val.length < shortTextModel.validation!.length!.first ? "Min ${shortTextModel.validation!.length!.first} characters required !" : null;
+           //  }
+           //   if(shortTextModel.validation!.length!.last > -1)
+           //   {
+           //    print("-- ${shortTextModel.validation!.length!.last} - ${val!.length}");
+           //    return val.length > shortTextModel.validation!.length!.last ? "Max ${shortTextModel.validation!.length!.last} characters required !" : null;
+           //  }
         } ,
         decoration: InputDecoration(
           label: Text(shortTextModel.label!)
@@ -61,28 +82,80 @@ class _UserFormState extends State<UserForm> {
   }
 
   Widget buildRadio(int idx)
-  {
+   {
+    print(jsonDecode(responseTxt!)['fields'].elementAt(idx)["ob"]);
     RadioModel radioModel = RadioModel.fromJson(jsonDecode(responseTxt!)['fields'].elementAt(idx)["ob"]);
 
-    return Row(
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        for(int i = 0 ; i < radioModel.values!.length ; i++)
-          Row(
-            children: [
-              Radio(
-                  toggleable: true,
-                  value: radioModel.values!.elementAt(i), groupValue: groupValue.elementAt(idx), onChanged: (value){
-                    if(value == null)
-                      {
-                        log("-  now NULL ");
-                      }
-                  setState(() {
-                    groupValue[idx] = value.toString();
-                  });
-              }),
-              Text(radioModel.values!.elementAt(i))
-            ],
-          )
+        Row(
+          children: [
+            for(int i = 0 ; i < radioModel.values!.length ; i++)
+              Row(
+                children: [
+                  Radio(
+                      toggleable: true,
+                      value: radioModel.values!.elementAt(i), groupValue: groupValue.elementAt(idx), onChanged: (value){
+                        if(value == null)
+                          {
+                            log("-  now NULL ");
+                          }
+                      setState(() {
+                        groupValue[idx] = value.toString();
+                      });
+                  }),
+                  Text(radioModel.values!.elementAt(i))
+                ],
+              )
+          ],
+        ),
+        Visibility(
+          visible: radioVisible[idx]!,
+          child: const Padding(
+            padding: EdgeInsets.fromLTRB(10,0,0,0),
+            child: Text("Please Choose One",style: TextStyle(color: Colors.red),),
+          ),
+        )
+      ],
+    );
+  }
+
+  Widget buildDropDown(int idx)
+  {
+    print(jsonDecode(responseTxt!)['fields'].elementAt(idx)["ob"]);
+    DropDownModel dropDownModel = DropDownModel.fromJson(jsonDecode(responseTxt!)['fields'].elementAt(idx)["ob"]);
+
+
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        DropdownButton(
+          hint: const Text('Please choose a location'), // Not necessary for Option 1
+          value: dropDownValue.elementAt(idx),
+          onChanged: (newValue) {
+            setState(() {
+              dropDownValue[idx] = newValue;
+            });
+          },
+          items: dropDownModel.values?.map((c) => c.value).toList().map((location) {
+            return DropdownMenuItem(
+              value: location,
+              child: Text(location!),
+            );
+          }).toList(),
+        ),
+        Visibility(
+          visible: dropDownVisible[idx]!,
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(10,0,0,0),
+            child: Text("Please Choose one",style: TextStyle(color: Colors.red),),
+          ),
+        )
       ],
     );
   }
@@ -90,25 +163,37 @@ class _UserFormState extends State<UserForm> {
   Widget buildCheckBox(int idx)
   {
     CheckBoxModel checkBoxModel = CheckBoxModel.fromJson(jsonDecode(responseTxt!)['fields'].elementAt(idx)["ob"]);
-
-
-    return Row(
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        for(int i = 0 ; i < checkBoxModel.values!.length ; i++)
-          Row(
-            children: [
-              Checkbox(
-                checkColor: Colors.white,
-                activeColor: Colors.blue,
-                value: checkBoxValue.elementAt(idx)!.elementAt(i),
-                onChanged: (bool? value) {
-                  checkBoxValue[idx]![i] = value!;
-                  setState(() { });
-                },
+        Row(
+          children: [
+            for(int i = 0 ; i < checkBoxModel.values!.length ; i++)
+              Row(
+                children: [
+                  Checkbox(
+                    checkColor: Colors.white,
+                    activeColor: Colors.blue,
+                    value: checkBoxValue.elementAt(idx)!.elementAt(i),
+                    onChanged: (bool? value) {
+                      checkBoxValue[idx]![i] = value!;
+                      setState(() {});
+                    },
+                  ),
+                  Text( checkBoxModel.values!.elementAt(i).value!)
+                ],
               ),
-              Text( checkBoxModel.values!.elementAt(i).value!)
-            ],
+          ],
+        ),
+        Visibility(
+          visible: checkBoxVisible[idx]!,
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(10,0,0,0),
+            child: Text("Please Choose between ${checkBoxModel.validation!.minCheck!} to ${checkBoxModel.validation!.maxCheck!}",style: TextStyle(color: Colors.red),),
           ),
+        )
       ],
     );
   }
@@ -118,6 +203,10 @@ class _UserFormState extends State<UserForm> {
     responseTxt = await rootBundle.loadString("assets/form.json");
     uiModel = UiModel.fromJson(jsonDecode(responseTxt!));
     groupValue = List.generate(uiModel.fields!.length , (index) => null);
+    radioVisible = List.generate(uiModel.fields!.length , (index) => false);
+    checkBoxVisible = List.generate(uiModel.fields!.length , (index) => false);
+    dropDownVisible = List.generate(uiModel.fields!.length , (index) => false);
+    dropDownValue = List.generate(uiModel.fields!.length , (index) => null);
     checkBoxValue  = List.generate(uiModel.fields!.length, (index) => null);
     editTexts  = List.generate(uiModel.fields!.length, (index) => null);
     uiModel.fields!.forEach((element) {
@@ -129,6 +218,10 @@ class _UserFormState extends State<UserForm> {
        {
          CheckBoxModel checkBoxModel = CheckBoxModel.fromJson(element.ob!.toJson());
          checkBoxValue.insert(element.id!, List.generate(checkBoxModel.values!.length, (index) => false));
+       }
+       else if(element.type == Constants.dropDown)
+       {
+         dropDownValue.insert(element.id!, null);
        }
     });
     setState(() {});
@@ -160,12 +253,12 @@ class _UserFormState extends State<UserForm> {
                       case Constants.shortText : return buildShortText(i);
                       case Constants.radio : return buildRadio(i);
                       case Constants.checkBox : return buildCheckBox(i);
+                      case Constants.dropDown : return buildDropDown(i);
                       default : return Container();
                     }
                   }),
-              ElevatedButton(onPressed: (){
-                if(_formKey.currentState!.validate())
-                  {
+              ElevatedButton(
+                  onPressed: (){
                     for(int i= 0; i <uiModel.fields!.length ; i++)
                     {
                       log("- ${uiModel.fields!.elementAt(i).type}");
@@ -182,10 +275,14 @@ class _UserFormState extends State<UserForm> {
                             {
                               if(groupValue[i] == "null")
                               {
-                                  CommonWidgets.showToast("Please select item !");
+                                  radioVisible[i] = true;
+                                  setState(() {});
+                                  //CommonWidgets.showToast("Please select item !");
                               }
                               else
                                 {
+                                  radioVisible[i] = false;
+                                  setState(() {});
                                   log("Radio is ${groupValue[i]}");
                                 }
                             }
@@ -193,13 +290,51 @@ class _UserFormState extends State<UserForm> {
                         break;
                         case Constants.checkBox : {
                           log("chckbox ${checkBoxValue.elementAt(i).toString()}");
+                          int selectedCount = 0;
+                          CheckBoxModel checkboxModel = CheckBoxModel.fromJson(jsonDecode(responseTxt!)['fields'].elementAt(i)["ob"]);
+                          for(int index = 0; index < checkBoxValue.elementAt(i)!.length; index++){
+                            if(checkBoxValue.elementAt(i)![index] == true){
+                              selectedCount++;
+                            }
+                          }
+                          if(checkboxModel.validation!.minCheck! <= selectedCount  && selectedCount <= checkboxModel.validation!.maxCheck!){
+                            checkBoxVisible[i] = false;
+                            setState(() {});
+                          }
+                          else{
+                            checkBoxVisible[i] = true;
+                            setState(() {});
+                          }
+                        }
+                        break;
+                        case Constants.dropDown : {
+                          DropDownModel dropDownModel = DropDownModel.fromJson(jsonDecode(responseTxt!)['fields'].elementAt(i)["ob"]);
+                          if(dropDownModel.validation!.isMandatory != null && dropDownModel.validation!.isMandatory!)
+                          {
+                            if(dropDownValue[i] == null)
+                            {
+                              dropDownVisible[i] = true;
+                              setState(() {});
+                            }
+                            else
+                            {
+                              dropDownVisible[i] = false;
+                              setState(() {});
+                            }
+                          }
                         }
                         break;
                         default : log("");
                       }
                     }
-                  }
-              }, child: Text("Submit"))
+                    if(_formKey.currentState!.validate())
+                    {
+                      if(!radioVisible.contains(true) && !checkBoxVisible.contains(true) && !dropDownVisible.contains(true)){
+                        CommonWidgets.showToast("All Done!!!!!!!");
+                      }
+                    }
+              },
+                  child: const Text("Submit"))
             ],
           ),
         )),

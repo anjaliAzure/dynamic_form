@@ -1,120 +1,224 @@
 {
-
-"fields" : [
-{
-"type" : "short_text",
-	"id" : 0,
-	"ob" :
-	 {"label" : "Enter Name",
-	  "validation" : 
+	"fields": [
 		{
-		"content-type" : "email / password / phone",
-		"input_type" : "text / number ",
-		"length" : [5 , 10]
-		}
-	
-	 }
-},
-
-{
-"type" : "short_text",
-"id" : 1,
-
-	"ob" : 
-	 {
-		 "label" : "Enter email",
-		  "validation" :
-			{
-			"content-type" : "email / password / phone",
-			"input_type" : "text / number ",
-			"length" : [5, 10]
+			"type": "short_text",
+			"id": 0,
+			"ob": {
+				"label": "Enter Name",
+				"validation": {
+					"content-type": "email / password / phone",
+					"input_type": "text / number ",
+					"length": [
+						2,
+						10
+					]
+				}
 			}
-	
-	 }
-},
-
-	{
-		"type": "radio",
-		"id" : 2,
-		"label": "Enter Type",
-		"ob": {
-			"values": ["one", "two", "three"],
-			"validation": {
-				"is_mandatory": true
+		},
+		{
+			"type": "short_text",
+			"id": 1,
+			"ob": {
+				"label": "Enter email",
+				"validation": {
+					"content-type": "email / password / phone",
+					"input_type": "text / number ",
+					"length": [
+						2,
+						10
+					]
+				}
+			}
+		},
+		{
+			"type": "radio",
+			"id": 2,
+			"label": "Enter Type",
+			"ob": {
+				"values": [
+					"one",
+					"two",
+					"three"
+				],
+				"validation": {
+					"is_mandatory": true
+				}
+			}
+		},
+		{
+			"type": "radio",
+			"id": 3,
+			"label": "Enter Type",
+			"ob": {
+				"values": [
+					"five",
+					"six"
+				],
+				"validation": {
+					"is_mandatory": true
+				}
+			}
+		},
+		{
+			"type": "checkBox",
+			"id": 4,
+			"label": "Enter choice",
+			"ob": {
+				"values": [
+					{
+						"id": 4,
+						"value": "Yes"
+					},
+					{
+						"id": 3,
+						"value": "No"
+					},
+					{
+						"id": 2,
+						"value": "Maybe"
+					}
+				],
+				"validation": {
+					"min_check": 0,
+					"max_check": 3
+				}
+			}
+		},
+		{
+			"type": "checkBox",
+			"id": 5,
+			"label": "Enter choice",
+			"ob": {
+				"values": [
+					{
+						"id": 4,
+						"value": "Yes"
+					},
+					{
+						"id": 3,
+						"value": "No"
+					},
+					{
+						"id": 2,
+						"value": "Maybe"
+					}
+				],
+				"validation": {
+					"min_check": 1,
+					"max_check": 2
+				}
+			}
+		},
+		{
+			"type": "checkBox",
+			"id": 6,
+			"label": "Enter choice",
+			"ob": {
+				"values": [
+					{
+						"id": 4,
+						"value": "Yes"
+					},
+					{
+						"id": 3,
+						"value": "No"
+					},
+					{
+						"id": 2,
+						"value": "Maybe"
+					}
+				],
+				"validation": {
+					"min_check": 2,
+					"max_check": 3
+				}
+			}
+		},
+		{
+			"type": "radio",
+			"id": 7,
+			"label": "Enter Type",
+			"ob": {
+				"values": [
+					"ten",
+					"eleven"
+				],
+				"validation": {
+					"is_mandatory": true
+				}
+			}
+		},
+		{
+			"type": "dropDown",
+			"id": 8,
+			"label": "Choose City",
+			"ob": {
+				"values": [
+					{
+						"id": 0,
+						"value": "Delhi"
+					},
+					{
+						"id": 1,
+						"value": "California"
+					},
+					{
+						"id": 2,
+						"value": "Toronto"
+					},
+					{
+						"id": 3,
+						"value": "Madrid"
+					},
+					{
+						"id": 4,
+						"value": "Sydney"
+					},
+					{
+						"id": 5,
+						"value": "Moscow"
+					}
+				],
+				"validation": {
+					"is_mandatory": false
+				}
+			}
+		},
+		{
+			"type": "dropDown",
+			"id": 9,
+			"label": "Choose Country",
+			"ob": {
+				"values": [
+					{
+						"id": 0,
+						"value": "India"
+					},
+					{
+						"id": 1,
+						"value": "USA"
+					},
+					{
+						"id": 2,
+						"value": "Canada"
+					},
+					{
+						"id": 3,
+						"value": "Spain"
+					},
+					{
+						"id": 4,
+						"value": "Australia"
+					},
+					{
+						"id": 5,
+						"value": "Russia"
+					}
+				],
+				"validation": {
+					"is_mandatory": true
+				}
 			}
 		}
-	},
-
-	{
-		"type": "radio",
-		"id" : 3,
-		"label": "Enter Type",
-		"ob": {
-			"values": ["five", "six"],
-			"validation": {
-				"is_mandatory": true
-			}
-		}
-	},
-
-	{
-		"type": "checkBox",
-		"id" : 4,
-		"label": "Enter choice",
-		"ob": {
-			"values": [
-				{"id":4,"value":"Yes"},
-				{"id":3,"value":"No"},
-				{"id":2,"value":"Maybe"}
-			],
-			"validation": {
-				"min_check" : 1,
-				"max_check" : 2
-			}
-		}
-	},
-	{
-		"type": "checkBox",
-		"id" : 5,
-		"label": "Enter choice",
-		"ob": {
-			"values": [
-				{"id":4,"value":"Yes"},
-				{"id":3,"value":"No"},
-				{"id":2,"value":"Maybe"}
-			],
-			"validation": {
-				"min_check" : 1,
-				"max_check" : 2
-			}
-		}
-	},
-	{
-		"type": "checkBox",
-		"id" : 6,
-		"label": "Enter choice",
-		"ob": {
-			"values": [
-				{"id":4,"value":"Yes"},
-				{"id":3,"value":"No"},
-				{"id":2,"value":"Maybe"}
-			],
-			"validation": {
-				"min_check" : 1,
-				"max_check" : 2
-			}
-		}
-	},
-	{
-		"type": "radio",
-		"id" : 7,
-		"label": "Enter Type",
-		"ob": {
-			"values": ["ten", "eleven"],
-			"validation": {
-				"is_mandatory": true
-			}
-		}
-	}
-]
+	]
 }
