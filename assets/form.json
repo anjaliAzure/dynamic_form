@@ -33,12 +33,21 @@
 		{
 			"type": "radio",
 			"id": 2,
-			"label": "Enter Type",
 			"ob": {
+				"label": "Enter Type",
 				"values": [
-					"one",
-					"two",
-					"three"
+					{
+						"id" : 0,
+						"value" : "one"
+					},
+					{
+						"id" : 1,
+						"value" : "two"
+					},
+					{
+						"id" : 2,
+						"value" : "three"
+					}
 				],
 				"validation": {
 					"is_mandatory": true
@@ -48,11 +57,25 @@
 		{
 			"type": "radio",
 			"id": 3,
-			"label": "Enter Type",
 			"ob": {
+				"label": "Enter Type",
+				"dependent" : true,
 				"values": [
-					"five",
-					"six"
+					{
+						 "id" : 0,
+						 "value" : "five",
+						 "cond" : []
+					},
+					{
+						"id" : 1,
+						"value" : "six",
+						"cond" : [
+							{
+								"id": 2,
+								"sub_id": 1
+							}
+						]
+					}
 				],
 				"validation": {
 					"is_mandatory": true
@@ -62,15 +85,15 @@
 		{
 			"type": "checkBox",
 			"id": 4,
-			"label": "Enter choice",
 			"ob": {
+				"label": "Enter choice",
 				"values": [
 					{
-						"id": 4,
+						"id": 0,
 						"value": "Yes"
 					},
 					{
-						"id": 3,
+						"id": 1,
 						"value": "No"
 					},
 					{
@@ -87,15 +110,15 @@
 		{
 			"type": "checkBox",
 			"id": 5,
-			"label": "Enter choice",
 			"ob": {
+				"label": "Enter choice",
 				"values": [
 					{
-						"id": 4,
+						"id": 0,
 						"value": "Yes"
 					},
 					{
-						"id": 3,
+						"id": 1,
 						"value": "No"
 					},
 					{
@@ -112,15 +135,16 @@
 		{
 			"type": "checkBox",
 			"id": 6,
-			"label": "Enter choice",
+
 			"ob": {
+				"label": "Enter choice",
 				"values": [
 					{
-						"id": 4,
+						"id": 0,
 						"value": "Yes"
 					},
 					{
-						"id": 3,
+						"id": 1,
 						"value": "No"
 					},
 					{
@@ -137,11 +161,17 @@
 		{
 			"type": "radio",
 			"id": 7,
-			"label": "Enter Type",
 			"ob": {
+				"label": "Enter Type",
 				"values": [
-					"ten",
-					"eleven"
+					{
+						"id" : 0,
+						"value" : "ten"
+					},
+					{
+						"id" : 1,
+						"value" : "eleven"
+					}
 				],
 				"validation": {
 					"is_mandatory": true
@@ -151,8 +181,8 @@
 		{
 			"type": "dropDown",
 			"id": 8,
-			"label": "Choose City",
 			"ob": {
+				"label": "Choose City",
 				"values": [
 					{
 						"id": 0,
@@ -187,8 +217,8 @@
 		{
 			"type": "dropDown",
 			"id": 9,
-			"label": "Choose Country",
 			"ob": {
+				"label": "Choose Country",
 				"values": [
 					{
 						"id": 0,
@@ -220,5 +250,7 @@
 				}
 			}
 		}
-	]
+	],
+	"total_page" : 2,
+	"current_page" : 1
 }

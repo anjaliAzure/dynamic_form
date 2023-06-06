@@ -9,6 +9,7 @@ import 'package:test2/models/dropdown_model.dart';
 import 'package:test2/models/radio_model.dart';
 import 'package:test2/models/short_text_model.dart';
 import 'package:test2/models/ui_model.dart';
+import 'package:test2/models/condition_model.dart' as ConditionModel;
 
 class UserForm extends StatefulWidget {
   const UserForm({Key? key}) : super(key: key);
@@ -21,13 +22,47 @@ class _UserFormState extends State<UserForm> {
 
   String? responseTxt;
   late UiModel uiModel;
-  late List<String?> groupValue;
+  late List<Map<int , String>?> radioValue;
   late List<bool?> radioVisible,checkBoxVisible,dropDownVisible;
   late List<String?> dropDownValue;
   late List<List<bool>?> checkBoxValue;
   late List<String?> editTexts;
 
   final _formKey = GlobalKey<FormState>();
+
+  bool checkCondition(
+      {required bool isDependent, required List<dynamic> value}) {
+
+    if (isDependent) {
+        if(value.isEmpty)
+          {
+            return true;
+          }
+        for (int i = 0; i < value.length; i++) {
+          ConditionModel.Cond conditionModel = ConditionModel.Cond.fromJson(jsonDecode(jsonEncode(value[i]).toString()));
+          switch (uiModel.fields!.elementAt(conditionModel.id!).type) {
+            case Constants.radio :
+              {
+                if (radioValue[conditionModel.id!]?.keys.elementAt(0) == conditionModel.subId) {
+                  return false;
+                }
+              }
+              break;
+
+            case Constants.checkBox :
+              {
+                if (dropDownValue[conditionModel.id!] == "null" ||
+                    radioValue[conditionModel.id!] == "false") {
+                  return false;
+                }
+              }
+              break;
+          }
+        }
+        return true;
+    }
+    return true;
+  }
 
   Widget buildShortText(int idx)
   {
@@ -55,21 +90,6 @@ class _UserFormState extends State<UserForm> {
               return null;
             }
           }
-           // if(shortTextModel.validation!.length!.first > -1 && shortTextModel.validation!.length!.last > -1 )
-           //  {
-           //    return val!.length < shortTextModel.validation!.length!.first  || val.length > shortTextModel.validation!.length!.last
-           //        ? "Please enter valid data" : null;
-           //  }
-           //   if(shortTextModel.validation!.length!.first > -1)
-           //  {
-           //    print("-- ${shortTextModel.validation!.length!.first} - ${val!.length}");
-           //    return val.length < shortTextModel.validation!.length!.first ? "Min ${shortTextModel.validation!.length!.first} characters required !" : null;
-           //  }
-           //   if(shortTextModel.validation!.length!.last > -1)
-           //   {
-           //    print("-- ${shortTextModel.validation!.length!.last} - ${val!.length}");
-           //    return val.length > shortTextModel.validation!.length!.last ? "Max ${shortTextModel.validation!.length!.last} characters required !" : null;
-           //  }
         } ,
         decoration: InputDecoration(
           label: Text(shortTextModel.label!)
@@ -94,21 +114,22 @@ class _UserFormState extends State<UserForm> {
         Row(
           children: [
             for(int i = 0 ; i < radioModel.values!.length ; i++)
-              Row(
-                children: [
-                  Radio(
-                      toggleable: true,
-                      value: radioModel.values!.elementAt(i), groupValue: groupValue.elementAt(idx), onChanged: (value){
-                        if(value == null)
-                          {
-                            log("-  now NULL ");
-                          }
-                      setState(() {
-                        groupValue[idx] = value.toString();
-                      });
-                  }),
-                  Text(radioModel.values!.elementAt(i))
-                ],
+              Visibility(
+                visible: checkCondition(isDependent : radioModel.dependent ?? false, value: radioModel.values!.elementAt(i).cond ?? []),
+                child: Row(
+                  children: [
+                    Radio(
+                        toggleable: true,
+                        value: radioModel.values!.elementAt(i).value , groupValue: radioValue.elementAt(idx)!.values.elementAt(0), onChanged: (value){
+                        setState(() {
+                          radioValue[idx] = {
+                            i : value.toString()
+                          };
+                        });
+                    }),
+                    Text(radioModel.values!.elementAt(i).value!)
+                  ],
+                ),
               )
           ],
         ),
@@ -202,7 +223,7 @@ class _UserFormState extends State<UserForm> {
   {
     responseTxt = await rootBundle.loadString("assets/form.json");
     uiModel = UiModel.fromJson(jsonDecode(responseTxt!));
-    groupValue = List.generate(uiModel.fields!.length , (index) => null);
+    radioValue = List.generate(uiModel.fields!.length , (index) => null);
     radioVisible = List.generate(uiModel.fields!.length , (index) => false);
     checkBoxVisible = List.generate(uiModel.fields!.length , (index) => false);
     dropDownVisible = List.generate(uiModel.fields!.length , (index) => false);
@@ -210,9 +231,12 @@ class _UserFormState extends State<UserForm> {
     checkBoxValue  = List.generate(uiModel.fields!.length, (index) => null);
     editTexts  = List.generate(uiModel.fields!.length, (index) => null);
     uiModel.fields!.forEach((element) {
+
        if(element.type == Constants.radio)
          {
-           groupValue.insert(element.id!, "null");
+           radioValue.insert(element.id!, {
+             -1 : "null"
+           });
          }
        else if(element.type == Constants.checkBox)
        {
@@ -273,7 +297,7 @@ class _UserFormState extends State<UserForm> {
                           RadioModel radioModel = RadioModel.fromJson(jsonDecode(responseTxt!)['fields'].elementAt(i)["ob"]);
                           if(radioModel.validation!.isMandatory != null && radioModel.validation!.isMandatory!)
                             {
-                              if(groupValue[i] == "null")
+                              if(radioValue[i] == "null")
                               {
                                   radioVisible[i] = true;
                                   setState(() {});
@@ -283,7 +307,7 @@ class _UserFormState extends State<UserForm> {
                                 {
                                   radioVisible[i] = false;
                                   setState(() {});
-                                  log("Radio is ${groupValue[i]}");
+                                  log("Radio is ${radioValue[i]}");
                                 }
                             }
                         }
