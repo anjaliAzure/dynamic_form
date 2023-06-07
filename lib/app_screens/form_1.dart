@@ -25,7 +25,7 @@ class _UserFormState extends State<UserForm> {
   late List<Map<int , String>?> radioValue;
   late List<bool?> radioVisible,checkBoxVisible,dropDownVisible;
   late List<String?> dropDownValue;
-  late List<List<bool>?> checkBoxValue;
+  late List<Map<int , bool>?> checkBoxValue;
   late List<String?> editTexts;
 
   final _formKey = GlobalKey<FormState>();
@@ -38,7 +38,7 @@ class _UserFormState extends State<UserForm> {
           {
             return true;
           }
-        for (int i = 0; i < value.length; i++) {
+        for (int i = 0; i < value.length; i++) { //traverse condition array
           ConditionModel.Cond conditionModel = ConditionModel.Cond.fromJson(jsonDecode(jsonEncode(value[i]).toString()));
           switch (uiModel.fields!.elementAt(conditionModel.id!).type) {
             case Constants.radio :
@@ -51,9 +51,10 @@ class _UserFormState extends State<UserForm> {
 
             case Constants.checkBox :
               {
-                if (dropDownValue[conditionModel.id!] == "null" ||
-                    radioValue[conditionModel.id!] == "false") {
-                  return false;
+                for(int index = 0; index < checkBoxValue[conditionModel.id!]!.keys.length; index++) {
+                  if (checkBoxValue[conditionModel.id!]!.keys.elementAt(index) == conditionModel.subId && checkBoxValue[conditionModel.id!]![index] == true) {
+                   return false;
+                  }
                 }
               }
               break;
@@ -120,11 +121,20 @@ class _UserFormState extends State<UserForm> {
                   children: [
                     Radio(
                         toggleable: true,
-                        value: radioModel.values!.elementAt(i).value , groupValue: radioValue.elementAt(idx)!.values.elementAt(0), onChanged: (value){
+                        value: radioModel.values!.elementAt(i).value ,
+                        groupValue: radioValue.elementAt(idx)!.values.elementAt(0),
+                        onChanged: (value){
                         setState(() {
-                          radioValue[idx] = {
-                            i : value.toString()
-                          };
+                          if(value == null){
+                            radioValue[idx] = {
+                              -1 : value.toString()
+                            };
+                          }
+                          else {
+                            radioValue[idx] = {
+                              i: value.toString()
+                            };
+                          }
                         });
                     }),
                     Text(radioModel.values!.elementAt(i).value!)
@@ -172,7 +182,7 @@ class _UserFormState extends State<UserForm> {
         ),
         Visibility(
           visible: dropDownVisible[idx]!,
-          child: Padding(
+          child: const Padding(
             padding: EdgeInsets.fromLTRB(10,0,0,0),
             child: Text("Please Choose one",style: TextStyle(color: Colors.red),),
           ),
@@ -192,27 +202,30 @@ class _UserFormState extends State<UserForm> {
         Row(
           children: [
             for(int i = 0 ; i < checkBoxModel.values!.length ; i++)
-              Row(
-                children: [
-                  Checkbox(
-                    checkColor: Colors.white,
-                    activeColor: Colors.blue,
-                    value: checkBoxValue.elementAt(idx)!.elementAt(i),
-                    onChanged: (bool? value) {
-                      checkBoxValue[idx]![i] = value!;
-                      setState(() {});
-                    },
-                  ),
-                  Text( checkBoxModel.values!.elementAt(i).value!)
-                ],
+              Visibility(
+                visible: checkCondition(isDependent : checkBoxModel.dependent ?? false, value: checkBoxModel.values!.elementAt(i).cond ?? []),
+                child: Row(
+                  children: [
+                    Checkbox(
+                      checkColor: Colors.white,
+                      activeColor: Colors.blue,
+                      value: checkBoxValue.elementAt(idx)![i],
+                      onChanged: (bool? value) {
+                        checkBoxValue[idx]![i] = value!;
+                        setState(() {});
+                      },
+                    ),
+                    Text( checkBoxModel.values!.elementAt(i).value!)
+                  ],
+                ),
               ),
           ],
         ),
         Visibility(
           visible: checkBoxVisible[idx]!,
           child: Padding(
-            padding: EdgeInsets.fromLTRB(10,0,0,0),
-            child: Text("Please Choose between ${checkBoxModel.validation!.minCheck!} to ${checkBoxModel.validation!.maxCheck!}",style: TextStyle(color: Colors.red),),
+            padding: const EdgeInsets.fromLTRB(10,0,0,0),
+            child: Text("Please Choose between ${checkBoxModel.validation!.minCheck!} to ${checkBoxModel.validation!.maxCheck!}",style: const TextStyle(color: Colors.red),),
           ),
         )
       ],
@@ -228,7 +241,7 @@ class _UserFormState extends State<UserForm> {
     checkBoxVisible = List.generate(uiModel.fields!.length , (index) => false);
     dropDownVisible = List.generate(uiModel.fields!.length , (index) => false);
     dropDownValue = List.generate(uiModel.fields!.length , (index) => null);
-    checkBoxValue  = List.generate(uiModel.fields!.length, (index) => null);
+    checkBoxValue  = List.generate(uiModel.fields!.length, (index) => <int, bool>{});
     editTexts  = List.generate(uiModel.fields!.length, (index) => null);
     uiModel.fields!.forEach((element) {
 
@@ -241,7 +254,9 @@ class _UserFormState extends State<UserForm> {
        else if(element.type == Constants.checkBox)
        {
          CheckBoxModel checkBoxModel = CheckBoxModel.fromJson(element.ob!.toJson());
-         checkBoxValue.insert(element.id!, List.generate(checkBoxModel.values!.length, (index) => false));
+         for(int index = 0; index < checkBoxModel.values!.length; index++) {
+             checkBoxValue[element.id!]![checkBoxModel.values![index].id!] = false;
+         }
        }
        else if(element.type == Constants.dropDown)
        {

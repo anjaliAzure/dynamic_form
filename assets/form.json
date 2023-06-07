@@ -112,6 +112,7 @@
 			"id": 5,
 			"ob": {
 				"label": "Enter choice",
+				"dependent" : true,
 				"values": [
 					{
 						"id": 0,
@@ -119,11 +120,23 @@
 					},
 					{
 						"id": 1,
-						"value": "No"
+						"value": "No",
+						"cond" : [
+							{
+								"id": 4,
+								"sub_id": 1
+							}
+						]
 					},
 					{
 						"id": 2,
-						"value": "Maybe"
+						"value": "Maybe",
+						"cond" : [
+							{
+								"id": 4,
+								"sub_id": 1
+							}
+						]
 					}
 				],
 				"validation": {
