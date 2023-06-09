@@ -19,7 +19,8 @@ class UserForm extends StatefulWidget {
 
 class _UserFormState extends State<UserForm> {
 
-  int currentPage = 0; // initial page is  First Page
+  int currentPage = 0;// initial page is  First Page
+  late int totalPage;
   String? responseTxt;
   late UiModel uiModel;
   late List<Map<int, String>?> radioValue;
@@ -308,6 +309,8 @@ class _UserFormState extends State<UserForm> {
     editTexts = List.generate(15, (index) => null);//List.generate(uiModel.fields!.elementAt(0).page!.length, (index) => null);
 
     log("check le ${checkBoxValue.length}");
+
+    totalPage = uiModel.fields!.elementAt(0).page!.length;
     /// initialise list of all Types
     uiModel.fields!.elementAt(0).page!.forEach((element) {
 
@@ -464,16 +467,28 @@ class _UserFormState extends State<UserForm> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
-                      ElevatedButton(onPressed: (){
-                        setState(() {
-                          currentPage --;
-                        });
-                      }, child: Text("Prev")),
-                      ElevatedButton(onPressed: (){
-                        setState(() {
-                          currentPage ++;
-                        });
-                      }, child: Text("Next"))
+                      Visibility(
+                        maintainSize: true,
+                        maintainState: true,
+                        maintainAnimation: true,
+                        visible: currentPage > 0 ? true : false,
+                        child: ElevatedButton(onPressed: (){
+                          setState(() {
+                            currentPage --;
+                          });
+                        }, child: Text("Prev")),
+                      ),
+                      Visibility(
+                        maintainSize: true,
+                        maintainAnimation: true,
+                        maintainState: true,
+                        visible: currentPage != totalPage -1 ,
+                        child: ElevatedButton(onPressed: (){
+                          setState(() {
+                            currentPage ++;
+                          });
+                        }, child: Text("Next")),
+                      )
                 ],))
               ],
             ));
