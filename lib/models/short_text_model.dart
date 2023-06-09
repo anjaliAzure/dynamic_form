@@ -29,14 +29,14 @@ class Validation {
   Validation({this.contentType, this.inputType, this.length});
 
   Validation.fromJson(Map<String, dynamic> json) {
-    contentType = json['content-type'];
+    contentType = json['content_type'];
     inputType = json['input_type'];
     length = json['length'].cast<int>();
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['content-type'] = this.contentType;
+    data['content_type'] = this.contentType;
     data['input_type'] = this.inputType;
     data['length'] = this.length;
     return data;
