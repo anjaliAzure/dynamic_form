@@ -1,13 +1,16 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:image_picker/image_picker.dart';
 import 'package:test2/app_constants/constants.dart';
 import 'package:test2/common_utilities/common_widgets.dart';
 import 'package:test2/models/checkBoxModel.dart';
 import 'package:test2/models/condition_model.dart' as ConditionModel;
 import 'package:test2/models/dropdown_model.dart';
+import 'package:test2/models/image_model.dart';
 import 'package:test2/models/radio_model.dart';
 import 'package:test2/models/short_text_model.dart';
 import 'package:test2/models/ui_model.dart';
@@ -23,10 +26,12 @@ class _UserFormState extends State<UserForm> {
   String? responseTxt;
   late UiModel uiModel;
   late List<Map<int, String>?> radioValue;
-  late List<bool?> radioVisible, checkBoxVisible, dropDownVisible;
+  late List<bool?> radioVisible, checkBoxVisible, dropDownVisible, imageVisible;
   late List<Map<int, dynamic>?> dropDownValue;
   late List<Map<int, bool>?> checkBoxValue;
   late List<String?> editTexts;
+  late List<XFile>? imageFileList;
+  final ImagePicker picker = ImagePicker();
 
   final _formKey = GlobalKey<FormState>();
 
@@ -266,6 +271,141 @@ class _UserFormState extends State<UserForm> {
     );
   }
 
+  Widget buildImage(int idx){
+    ImageModel imageModel = ImageModel.fromJson(
+        jsonDecode(responseTxt!)['fields'].elementAt(idx)["ob"]);
+
+    return Visibility(
+      visible: checkCondition(
+          isDependent: imageModel.dependent ?? false,
+          value: imageModel.cond ?? []),
+      child: Column(
+        mainAxisSize: MainAxisSize.max,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          imageFileList![idx].path == ""
+           ? Padding(
+             padding: const EdgeInsets.all(8.0),
+             child: Container(
+              //width: 80,
+              //height: 80,
+              decoration: BoxDecoration(border: Border.all(color: Colors.black26,)),
+              child: Padding(
+                padding: const EdgeInsets.all(4.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.max,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(imageModel.label!,),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        ElevatedButton(
+                          onPressed: () async {
+                            final XFile? pickedFile = await picker.pickImage(
+                              source: ImageSource.camera,
+                              maxWidth: 100,
+                              maxHeight: 100,
+                              imageQuality: 100,
+                            );
+                            setState(() {
+                              imageFileList![idx] = pickedFile!;
+                            });
+                          },
+                          style: ButtonStyle(
+                              shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                                  RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(18.0),
+                                      side: const BorderSide(color: Colors.grey)
+                                  )
+                              )
+                          ),
+                          child: const Icon(Icons.camera_alt_outlined),),
+                        const SizedBox(width: 10,),
+                        ElevatedButton(
+                          onPressed: () async {
+                            final XFile? pickedFile = await picker.pickImage(
+                              source: ImageSource.gallery,
+                              maxWidth: 100,
+                              maxHeight: 100,
+                              imageQuality: 100,
+                            );
+                            setState(() {
+                              imageFileList![idx] = pickedFile!;
+                            });
+                          },
+                          style: ButtonStyle(
+                                shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                                    RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(18.0),
+                                        side: const BorderSide(color: Colors.grey)
+                                    )
+                                )
+                            ),
+                          child: const Icon(Icons.photo_library_outlined),)
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+          ),
+           )
+          : Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    const Expanded(child: SizedBox()),
+                    ElevatedButton(
+                      onPressed: () async {
+                        setState(() {
+                          imageFileList![idx] = XFile("");
+                        });
+                      },
+                      style: ButtonStyle(
+                          shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                              RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(18.0),
+                                  side: const BorderSide(color: Colors.white)
+                              )
+                          )
+                      ),
+                      child: const Icon(Icons.cancel_outlined),),
+                  ],
+                ),
+                Container(
+                  width: 200,
+                  height: 150,
+                  decoration: BoxDecoration(border: Border.all(color: Colors.black,)),
+                  child: Image.file(
+                      File(imageFileList![idx].path),
+                      errorBuilder: (BuildContext context, Object error,
+                          StackTrace? stackTrace) =>
+                      const Center(
+                          child: Text('This image type is not supported')),
+                    ),
+                ),
+              ],
+            ),
+          ),
+          Visibility(
+            visible: imageVisible[idx]!,
+            child: const Padding(
+              padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
+              child: Text(
+                "Please add required image",
+                style: TextStyle(color: Colors.red),
+              ),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
   loadJson() async {
     responseTxt = await rootBundle.loadString("assets/form.json");
     uiModel = UiModel.fromJson(jsonDecode(responseTxt!));
@@ -273,6 +413,7 @@ class _UserFormState extends State<UserForm> {
     radioVisible = List.generate(uiModel.fields!.length, (index) => false);
     checkBoxVisible = List.generate(uiModel.fields!.length, (index) => false);
     dropDownVisible = List.generate(uiModel.fields!.length, (index) => false);
+    imageVisible = List.generate(uiModel.fields!.length, (index) => false);
     dropDownValue = List.generate(uiModel.fields!.length, (index) => null);
     checkBoxValue =
         List.generate(uiModel.fields!.length, (index) => <int, bool>{});
@@ -289,6 +430,9 @@ class _UserFormState extends State<UserForm> {
       } else if (element.type == Constants.dropDown) {
         //DropDownModel dropDownModel = DropDownModel.fromJson(element.ob!.toJson());
         dropDownValue.insert(element.id!, {-1: null});
+      }
+      else if (element.type == Constants.image) {
+        imageFileList = List.generate(uiModel.fields!.length, (index) => XFile(""));
       }
     });
     setState(() {});
@@ -400,6 +544,26 @@ class _UserFormState extends State<UserForm> {
                                             }
                                           }
                                           break;
+                                        case Constants.image:
+                                          {
+                                            ImageModel imageModel = ImageModel.fromJson(
+                                                jsonDecode(responseTxt!)['fields']
+                                                    .elementAt(i)["ob"]);
+                                            if (imageModel.validation!.isMandatory !=
+                                                null &&
+                                                imageModel
+                                                    .validation!.isMandatory!) {
+                                              if (imageFileList![i].path == "") {
+                                                imageVisible[i] = true;
+                                                setState(() {});
+                                                //CommonWidgets.showToast("Please select item !");
+                                              } else {
+                                                imageVisible[i] = false;
+                                                setState(() {});
+                                              }
+                                            }
+                                          }
+                                          break;
                                         default:
                                           log("");
                                       }
@@ -425,6 +589,8 @@ class _UserFormState extends State<UserForm> {
                                 return buildCheckBox(i);
                               case Constants.dropDown:
                                 return buildDropDown(i);
+                              case Constants.image:
+                                return buildImage(i);
                               default:
                                 return Container();
                             }
