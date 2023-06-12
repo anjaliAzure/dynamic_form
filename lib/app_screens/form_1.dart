@@ -14,6 +14,8 @@ import 'package:test2/models/radio_model.dart';
 import 'package:test2/models/short_text_model.dart';
 import 'package:test2/models/ui_model.dart';
 
+import '../common_utilities/common_widgets.dart';
+
 class UserForm extends StatefulWidget {
   const UserForm({Key? key}) : super(key: key);
 
@@ -494,114 +496,116 @@ class _UserFormState extends State<UserForm> {
   }
 
   submit(){
-    // for (int i = 0; i < uiModel.fields!.length; i++) {
-    //   switch (uiModel.fields!.elementAt(i).type) {
-    //     case Constants.shortText:
-    //       {
-    //         log("Text is ${editTexts.elementAt(i)}");
-    //       }
-    //       break;
-    //     case Constants.radio:
-    //       {
-    //         RadioModel radioModel = RadioModel.fromJson(
-    //             jsonDecode(responseTxt!)['fields']
-    //                 .elementAt(i)["ob"]);
-    //         if (radioModel.validation!.isMandatory !=
-    //             null &&
-    //             radioModel.validation!.isMandatory!) {
-    //           if (radioValue[i]!.values.elementAt(0) == "null") {
-    //             radioVisible[i] = true;
-    //             setState(() {});
-    //             //CommonWidgets.showToast("Please select item !");
-    //           } else {
-    //             radioVisible[i] = false;
-    //             setState(() {});
-    //             log("Radio is ${radioValue[i]}");
-    //           }
-    //         }
-    //       }
-    //       break;
-    //     case Constants.checkBox:
-    //       {
-    //         log("chckbox ${checkBoxValue.elementAt(i).toString()}");
-    //         int selectedCount = 0;
-    //         CheckBoxModel checkboxModel =
-    //         CheckBoxModel.fromJson(
-    //             jsonDecode(responseTxt!)['fields']
-    //                 .elementAt(i)["ob"]);
-    //         for (int index = 0;
-    //         index <
-    //             checkBoxValue.elementAt(i)!.length;
-    //         index++) {
-    //           if (checkBoxValue.elementAt(i)![index] ==
-    //               true) {
-    //             selectedCount++;
-    //           }
-    //         }
-    //         if (checkboxModel.validation!.minCheck! <=
-    //             selectedCount &&
-    //             selectedCount <=
-    //                 checkboxModel
-    //                     .validation!.maxCheck!) {
-    //           checkBoxVisible[i] = false;
-    //           setState(() {});
-    //         } else {
-    //           checkBoxVisible[i] = true;
-    //           setState(() {});
-    //         }
-    //       }
-    //       break;
-    //     case Constants.dropDown:
-    //       {
-    //         DropDownModel dropDownModel =
-    //         DropDownModel.fromJson(
-    //             jsonDecode(responseTxt!)['fields']
-    //                 .elementAt(i)["ob"]);
-    //         if (dropDownModel.validation!.isMandatory !=
-    //             null &&
-    //             dropDownModel
-    //                 .validation!.isMandatory!) {
-    //           if (dropDownValue[i]!.values.elementAt(0) == null) {
-    //             dropDownVisible[i] = true;
-    //             setState(() {});
-    //           } else {
-    //             dropDownVisible[i] = false;
-    //             setState(() {});
-    //           }
-    //         }
-    //       }
-    //       break;
-    // case Constants.image:
-    // {
-    // ImageModel imageModel = ImageModel.fromJson(
-    // jsonDecode(responseTxt!)['fields']
-    //     .elementAt(i)["ob"]);
-    // if (imageModel.validation!.isMandatory !=
-    // null &&
-    // imageModel
-    //     .validation!.isMandatory!) {
-    // if (imageFileList![i].path == "") {
-    // imageVisible[i] = true;
-    // setState(() {});
-    // //CommonWidgets.showToast("Please select item !");
-    // } else {
-    // imageVisible[i] = false;
-    // setState(() {});
-    // }
-    // }
-    // }
-    // break;
-    //     default:
-    //       log("");
-    //   }
-    // }
-    // if (_formKey.currentState!.validate()) {
-    //   if (!radioVisible.contains(true) &&
-    //       !checkBoxVisible.contains(true) &&
-    //       !dropDownVisible.contains(true)) {
-    //     CommonWidgets.showToast("All Done!!!!!!!");
-    //   }
-    // }
+
+    for(int i= 0; i < uiModel.fields!.elementAt(0).page!.length; i++)
+      {
+        for(int j = 0 ; j <  uiModel.fields!.elementAt(0).page!.elementAt(i).lists!.length ; j++)
+          {
+            int id = uiModel.fields!.elementAt(0).page!.elementAt(i).lists!.elementAt(j).id!;
+            log("id is $id");
+            switch (uiModel.fields!.elementAt(0).page!.elementAt(i).lists!.elementAt(j).type) {
+              case Constants.shortText:
+                {
+                  log("Text is ${editTexts.elementAt(i)}");
+                }
+                break;
+              case Constants.radio:
+                {
+                  RadioModel radioModel = RadioModel.fromJson(jsonDecode(responseTxt!)['fields'].elementAt(0)["page"].elementAt(i)["lists"].elementAt(j)['ob']);
+                  if (radioModel.validation!.isMandatory !=
+                      null &&
+                      radioModel.validation!.isMandatory!) {
+                    if (radioValue[id]!.values.elementAt(0) == "null") {
+                      radioVisible[id] = true;
+                      setState(() {});
+                      //CommonWidgets.showToast("Please select item !");
+                    } else {
+                      radioVisible[id] = false;
+                      setState(() {});
+                      log("Radio is ${radioValue[id]}");
+                    }
+                  }
+                }
+                break;
+              case Constants.checkBox:
+                {
+                  log("chckbox ${checkBoxValue.elementAt(i).toString()}");
+                  int selectedCount = 0;
+                  CheckBoxModel checkboxModel = CheckBoxModel.fromJson(jsonDecode(responseTxt!)['fields'].elementAt(0)["page"].elementAt(i)["lists"].elementAt(j)['ob']);
+                  for (int index = 0;
+                  index <
+                      checkBoxValue.elementAt(i)!.length;
+                  index++) {
+                    if (checkBoxValue.elementAt(i)![index] ==
+                        true) {
+                      selectedCount++;
+                    }
+                  }
+                  if (checkboxModel.validation!.minCheck! <=
+                      selectedCount &&
+                      selectedCount <=
+                          checkboxModel
+                              .validation!.maxCheck!) {
+                    checkBoxVisible[id] = false;
+                    setState(() {});
+                  } else {
+                    checkBoxVisible[id] = true;
+                    setState(() {});
+                  }
+                }
+                break;
+              case Constants.dropDown:
+                {
+                  DropDownModel dropDownModel = DropDownModel.fromJson(jsonDecode(responseTxt!)['fields'].elementAt(0)["page"].elementAt(i)["lists"].elementAt(j)['ob']);
+                  if (dropDownModel.validation!.isMandatory !=
+                      null &&
+                      dropDownModel
+                          .validation!.isMandatory!) {
+                    if (dropDownValue[id]!.values.elementAt(0) == null) {
+                      dropDownVisible[id] = true;
+                      setState(() {});
+                    } else {
+                      dropDownVisible[id] = false;
+                      setState(() {});
+                    }
+                  }
+                }
+                break;
+              case Constants.image:
+                {
+                  ImageModel imageModel = ImageModel.fromJson(jsonDecode(responseTxt!)['fields'].elementAt(0)["page"].elementAt(i)["lists"].elementAt(j)['ob']);
+                  if (imageModel.validation!.isMandatory !=
+                      null &&
+                      imageModel
+                          .validation!.isMandatory!) {
+                    if (imageFileList![id].path == "") {
+                      imageVisible[id] = true;
+                      setState(() {});
+                      //CommonWidgets.showToast("Please select item !");
+                    } else {
+                      imageVisible[id] = false;
+                      setState(() {});
+                    }
+                  }
+                }
+                break;
+              default:
+                log("");
+            }
+          }
+      }
+
+
+    for (int i = 0; i < uiModel.fields!.length; i++) {
+
+    }
+    if (_formKey.currentState!.validate()) {
+      if (!radioVisible.contains(true) &&
+          !checkBoxVisible.contains(true) &&
+          !dropDownVisible.contains(true)) {
+        CommonWidgets.showToast("All Done!!!!!!!");
+      }
+    }
   }
 
   @override
@@ -626,7 +630,15 @@ class _UserFormState extends State<UserForm> {
                         key: _formKey,
                         child: Padding(
                           padding: const EdgeInsets.all(8.0),
-                          child: buildPages()
+                          child: Column(
+                            children: [
+                              buildPages(),
+                              currentPage == uiModel.fields!.elementAt(0).page!.length - 1 ?
+                                  ElevatedButton(onPressed: (){
+                                    submit();
+                                  }, child: Text("Submit")) : Container()
+                            ],
+                          )
                         ),
                       ),
                     ),
