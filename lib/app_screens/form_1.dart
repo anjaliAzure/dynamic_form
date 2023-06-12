@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:image_picker/image_picker.dart';
 import 'package:test2/app_constants/constants.dart';
-import 'package:test2/common_utilities/common_widgets.dart';
 import 'package:test2/models/checkBoxModel.dart';
 import 'package:test2/models/condition_model.dart' as ConditionModel;
 import 'package:test2/models/dropdown_model.dart';
@@ -23,6 +22,9 @@ class UserForm extends StatefulWidget {
 }
 
 class _UserFormState extends State<UserForm> {
+
+  int currentPage = 0;// initial page is  First Page
+  late int totalPage;
   String? responseTxt;
   late UiModel uiModel;
   late List<Map<int, String>?> radioValue;
@@ -36,16 +38,22 @@ class _UserFormState extends State<UserForm> {
   final _formKey = GlobalKey<FormState>();
 
   bool checkCondition(
-      {required bool isDependent, required List<dynamic> value}) {
+      {required bool isDependent, required List<dynamic> value , required int page}) {
+
+    /// check is dependent
     if (isDependent) {
+
+      /// this field does not dependent so return true
       if (value.isEmpty) {
         return true;
       }
+
+      /// else
       for (int i = 0; i < value.length; i++) {
         //traverse condition array
         ConditionModel.Cond conditionModel = ConditionModel.Cond.fromJson(
             jsonDecode(jsonEncode(value[i]).toString()));
-        switch (uiModel.fields!.elementAt(conditionModel.id!).type) {
+        switch (uiModel.fields!.elementAt(0).page!.elementAt(page).lists!.singleWhere((element) => element.id == conditionModel.id).type) {
           case Constants.radio:
             {
               if (radioValue[conditionModel.id!]?.keys.elementAt(0) ==
@@ -82,9 +90,10 @@ class _UserFormState extends State<UserForm> {
     return true;
   }
 
-  Widget buildShortText(int idx) {
-    ShortTextModel shortTextModel = ShortTextModel.fromJson(
-        jsonDecode(responseTxt!)['fields'].elementAt(idx)["ob"]);
+  Widget buildShortText(int page , int idx) {
+
+    ShortTextModel shortTextModel = ShortTextModel.fromJson(jsonDecode(responseTxt!)['fields'].elementAt(0)["page"].elementAt(page)["lists"].elementAt(idx)['ob']);
+    int id = jsonDecode(responseTxt!)['fields'].elementAt(0)["page"].elementAt(page)["lists"].elementAt(idx)['id'];
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: TextFormField(
@@ -109,17 +118,16 @@ class _UserFormState extends State<UserForm> {
         },
         decoration: InputDecoration(label: Text(shortTextModel.label!)),
         onChanged: (value) {
-          editTexts[idx] = value;
+          editTexts[id] = value;
         },
       ),
     );
   }
 
-  Widget buildRadio(int idx) {
-    print(jsonDecode(responseTxt!)['fields'].elementAt(idx)["ob"]);
-    RadioModel radioModel = RadioModel.fromJson(
-        jsonDecode(responseTxt!)['fields'].elementAt(idx)["ob"]);
+  Widget buildRadio(int page , int idx) {
 
+    RadioModel radioModel = RadioModel.fromJson(jsonDecode(responseTxt!)['fields'].elementAt(0)["page"].elementAt(page)["lists"].elementAt(idx)['ob']);
+    int id = jsonDecode(responseTxt!)['fields'].elementAt(0)["page"].elementAt(page)["lists"].elementAt(idx)['id'];
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
@@ -131,20 +139,20 @@ class _UserFormState extends State<UserForm> {
               Visibility(
                 visible: checkCondition(
                     isDependent: radioModel.dependent ?? false,
-                    value: radioModel.values!.elementAt(i).cond ?? []),
+                    value: radioModel.values!.elementAt(i).cond ?? [] , page: page),
                 child: Row(
                   children: [
                     Radio(
                         toggleable: true,
                         value: radioModel.values!.elementAt(i).value,
                         groupValue:
-                            radioValue.elementAt(idx)!.values.elementAt(0),
+                            radioValue.elementAt(id)!.values.elementAt(0),
                         onChanged: (value) {
                           setState(() {
                             if (value == null) {
-                              radioValue[idx] = {-1: value.toString()};
+                              radioValue[id] = {-1: value.toString()};
                             } else {
-                              radioValue[idx] = {i: value.toString()};
+                              radioValue[id] = {i: value.toString()};
                             }
                           });
                         }),
@@ -155,7 +163,7 @@ class _UserFormState extends State<UserForm> {
           ],
         ),
         Visibility(
-          visible: radioVisible[idx]!,
+          visible: radioVisible[id]!,
           child: const Padding(
             padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
             child: Text(
@@ -168,16 +176,15 @@ class _UserFormState extends State<UserForm> {
     );
   }
 
-  Widget buildDropDown(int idx) {
-    print(jsonDecode(responseTxt!)['fields'].elementAt(idx)["ob"]);
-    DropDownModel dropDownModel = DropDownModel.fromJson(
-        jsonDecode(responseTxt!)['fields'].elementAt(idx)["ob"]);
+  Widget buildDropDown(int page ,int idx) {
 
+    DropDownModel dropDownModel = DropDownModel.fromJson(jsonDecode(responseTxt!)['fields'].elementAt(0)["page"].elementAt(page)["lists"].elementAt(idx)['ob']);
 
+    int id = jsonDecode(responseTxt!)['fields'].elementAt(0)["page"].elementAt(page)["lists"].elementAt(idx)['id'];
     return Visibility(
       visible: checkCondition(
           isDependent: dropDownModel.dependent ?? false,
-          value: dropDownModel.cond ?? []),
+          value: dropDownModel.cond ?? [], page: page),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
@@ -186,7 +193,7 @@ class _UserFormState extends State<UserForm> {
           DropdownButton(
             hint: const Text('Please choose a location'),
             // Not necessary for Option 1
-            value: dropDownValue.elementAt(idx)!.values.first,
+            value: dropDownValue.elementAt(id)!.values.first,
             onChanged: (newValue) {
               setState(() {
                 int index = 0;
@@ -196,7 +203,7 @@ class _UserFormState extends State<UserForm> {
                     return;
                   }
                 });
-                dropDownValue[idx] = {index: newValue.toString()};
+                dropDownValue[id] = {index: newValue.toString()};
                 //dropDownValue[idx]![] = newValue;
               });
             },
@@ -211,7 +218,7 @@ class _UserFormState extends State<UserForm> {
             }).toList(),
           ),
           Visibility(
-            visible: dropDownVisible[idx]!,
+            visible: dropDownVisible[id]!,
             child: const Padding(
               padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
               child: Text(
@@ -225,9 +232,11 @@ class _UserFormState extends State<UserForm> {
     );
   }
 
-  Widget buildCheckBox(int idx) {
-    CheckBoxModel checkBoxModel = CheckBoxModel.fromJson(
-        jsonDecode(responseTxt!)['fields'].elementAt(idx)["ob"]);
+  Widget buildCheckBox(int page , int idx) {
+
+    CheckBoxModel checkBoxModel = CheckBoxModel.fromJson(jsonDecode(responseTxt!)['fields'].elementAt(0)["page"].elementAt(page)["lists"].elementAt(idx)['ob']);
+    int id = jsonDecode(responseTxt!)['fields'].elementAt(0)["page"].elementAt(page)["lists"].elementAt(idx)['id'];
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
@@ -239,15 +248,15 @@ class _UserFormState extends State<UserForm> {
               Visibility(
                 visible: checkCondition(
                     isDependent: checkBoxModel.dependent ?? false,
-                    value: checkBoxModel.values!.elementAt(i).cond ?? []),
+                    value: checkBoxModel.values!.elementAt(i).cond ?? [], page: page),
                 child: Row(
                   children: [
                     Checkbox(
                       checkColor: Colors.white,
                       activeColor: Colors.blue,
-                      value: checkBoxValue.elementAt(idx)![i],
+                      value: checkBoxValue.elementAt(id)![i],
                       onChanged: (bool? value) {
-                        checkBoxValue[idx]![i] = value!;
+                        checkBoxValue[id]![i] = value!;
                         setState(() {});
                       },
                     ),
@@ -258,7 +267,7 @@ class _UserFormState extends State<UserForm> {
           ],
         ),
         Visibility(
-          visible: checkBoxVisible[idx]!,
+          visible: checkBoxVisible[id]!,
           child: Padding(
             padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
             child: Text(
@@ -406,37 +415,165 @@ class _UserFormState extends State<UserForm> {
     );
   }
 
+  Widget buildPages()
+  {
+        return responseTxt != null ? ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: uiModel.fields!.first.page!.elementAt(currentPage).lists!.length ,
+            itemBuilder: (context , i){
+              switch (uiModel.fields!.first.page!.elementAt(currentPage).lists!.elementAt(i).type) {
+                case Constants.shortText:
+                  return buildShortText( currentPage , i);
+                case Constants.radio:
+                  return buildRadio(currentPage ,i);
+                case Constants.checkBox:
+                  return buildCheckBox(currentPage ,i);
+                case Constants.dropDown:
+                  return buildDropDown(currentPage ,i);
+                default:
+                  return Container();
+              }
+            }) : Container();
+
+  }
+
   loadJson() async {
     responseTxt = await rootBundle.loadString("assets/form.json");
     uiModel = UiModel.fromJson(jsonDecode(responseTxt!));
-    radioValue = List.generate(uiModel.fields!.length, (index) => null);
-    radioVisible = List.generate(uiModel.fields!.length, (index) => false);
-    checkBoxVisible = List.generate(uiModel.fields!.length, (index) => false);
-    dropDownVisible = List.generate(uiModel.fields!.length, (index) => false);
-    imageVisible = List.generate(uiModel.fields!.length, (index) => false);
-    dropDownValue = List.generate(uiModel.fields!.length, (index) => null);
-    checkBoxValue =
-        List.generate(uiModel.fields!.length, (index) => <int, bool>{});
-    editTexts = List.generate(uiModel.fields!.length, (index) => null);
-    uiModel.fields!.forEach((element) {
-      if (element.type == Constants.radio) {
-        radioValue.insert(element.id!, {-1: "null"});
-      } else if (element.type == Constants.checkBox) {
-        CheckBoxModel checkBoxModel =
-            CheckBoxModel.fromJson(element.ob!.toJson());
-        for (int index = 0; index < checkBoxModel.values!.length; index++) {
-          checkBoxValue[element.id!]![checkBoxModel.values![index].id!] = false;
+    radioValue = List.generate(15, (index) => null);// List.generate(uiModel.fields!.elementAt(0).page!.length, (index) => null);
+    radioVisible = List.generate(15, (index) => false);//List.generate(uiModel.fields!.elementAt(0).page!.length, (index) => false);
+    checkBoxVisible = List.generate(15, (index) => false);//List.generate(uiModel.fields!.elementAt(0).page!.length, (index) => false);
+    dropDownVisible = List.generate(15, (index) => false);//List.generate(uiModel.fields!.elementAt(0).page!.length, (index) => false);
+    dropDownValue = List.generate(15, (index) => null);//List.generate(uiModel.fields!.elementAt(0).page!.length, (index) => null);
+    checkBoxValue = List.generate(15, (index) => <int, bool>{});//List.generate(uiModel.fields!.elementAt(0).page!.length, (index) => <int, bool>{});
+    editTexts = List.generate(15, (index) => null);//List.generate(uiModel.fields!.elementAt(0).page!.length, (index) => null);
+
+    log("check le ${checkBoxValue.length}");
+
+    totalPage = uiModel.fields!.elementAt(0).page!.length;
+    /// initialise list of all Types
+    uiModel.fields!.elementAt(0).page!.forEach((element) {
+
+      element.lists!.forEach((element) {
+        switch(element.type)
+        {
+          case Constants.radio :
+          {
+            radioValue.insert(element.id!, {-1: "null"});
+          }
+          break;
+
+          case Constants.checkBox :
+          {
+            CheckBoxModel checkBoxModel = CheckBoxModel.fromJson(element.ob!.toJson());
+            for (int index = 0; index < checkBoxModel.values!.length; index++) {
+              checkBoxValue[element.id!]![checkBoxModel.values![index].id!] = false;
+            }
+          }
+          break;
+
+          case Constants.dropDown :
+            {
+              dropDownValue.insert(element.id!, {-1: null});
+            }
         }
-      } else if (element.type == Constants.dropDown) {
-        //DropDownModel dropDownModel = DropDownModel.fromJson(element.ob!.toJson());
-        dropDownValue.insert(element.id!, {-1: null});
-      }
-      else if (element.type == Constants.image) {
-        imageFileList = List.generate(uiModel.fields!.length, (index) => XFile(""));
-      }
+      });
+
     });
     setState(() {});
-    print(uiModel.fields!.length);
+
+  }
+
+  submit(){
+    // for (int i = 0; i < uiModel.fields!.length; i++) {
+    //   switch (uiModel.fields!.elementAt(i).type) {
+    //     case Constants.shortText:
+    //       {
+    //         log("Text is ${editTexts.elementAt(i)}");
+    //       }
+    //       break;
+    //     case Constants.radio:
+    //       {
+    //         RadioModel radioModel = RadioModel.fromJson(
+    //             jsonDecode(responseTxt!)['fields']
+    //                 .elementAt(i)["ob"]);
+    //         if (radioModel.validation!.isMandatory !=
+    //             null &&
+    //             radioModel.validation!.isMandatory!) {
+    //           if (radioValue[i]!.values.elementAt(0) == "null") {
+    //             radioVisible[i] = true;
+    //             setState(() {});
+    //             //CommonWidgets.showToast("Please select item !");
+    //           } else {
+    //             radioVisible[i] = false;
+    //             setState(() {});
+    //             log("Radio is ${radioValue[i]}");
+    //           }
+    //         }
+    //       }
+    //       break;
+    //     case Constants.checkBox:
+    //       {
+    //         log("chckbox ${checkBoxValue.elementAt(i).toString()}");
+    //         int selectedCount = 0;
+    //         CheckBoxModel checkboxModel =
+    //         CheckBoxModel.fromJson(
+    //             jsonDecode(responseTxt!)['fields']
+    //                 .elementAt(i)["ob"]);
+    //         for (int index = 0;
+    //         index <
+    //             checkBoxValue.elementAt(i)!.length;
+    //         index++) {
+    //           if (checkBoxValue.elementAt(i)![index] ==
+    //               true) {
+    //             selectedCount++;
+    //           }
+    //         }
+    //         if (checkboxModel.validation!.minCheck! <=
+    //             selectedCount &&
+    //             selectedCount <=
+    //                 checkboxModel
+    //                     .validation!.maxCheck!) {
+    //           checkBoxVisible[i] = false;
+    //           setState(() {});
+    //         } else {
+    //           checkBoxVisible[i] = true;
+    //           setState(() {});
+    //         }
+    //       }
+    //       break;
+    //     case Constants.dropDown:
+    //       {
+    //         DropDownModel dropDownModel =
+    //         DropDownModel.fromJson(
+    //             jsonDecode(responseTxt!)['fields']
+    //                 .elementAt(i)["ob"]);
+    //         if (dropDownModel.validation!.isMandatory !=
+    //             null &&
+    //             dropDownModel
+    //                 .validation!.isMandatory!) {
+    //           if (dropDownValue[i]!.values.elementAt(0) == null) {
+    //             dropDownVisible[i] = true;
+    //             setState(() {});
+    //           } else {
+    //             dropDownVisible[i] = false;
+    //             setState(() {});
+    //           }
+    //         }
+    //       }
+    //       break;
+    //     default:
+    //       log("");
+    //   }
+    // }
+    // if (_formKey.currentState!.validate()) {
+    //   if (!radioVisible.contains(true) &&
+    //       !checkBoxVisible.contains(true) &&
+    //       !dropDownVisible.contains(true)) {
+    //     CommonWidgets.showToast("All Done!!!!!!!");
+    //   }
+    // }
   }
 
   @override
@@ -449,155 +586,52 @@ class _UserFormState extends State<UserForm> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+
         body: responseTxt == null
             ? Container()
-            : SingleChildScrollView(
-                child: Form(
-                  key: _formKey,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: ListView.builder(
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        itemCount: uiModel.fields!.length + 1,
-                        itemBuilder: (ctx, i) {
-                          if(i == uiModel.fields!.length){
-                            return Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: ElevatedButton(
-                                  onPressed: () {
-                                    for (int i = 0; i < uiModel.fields!.length; i++) {
-                                      log("- ${uiModel.fields!.elementAt(i).type}");
-                                      switch (uiModel.fields!.elementAt(i).type) {
-                                        case Constants.shortText:
-                                          {
-                                            log("Text is ${editTexts.elementAt(i)}");
-                                          }
-                                          break;
-                                        case Constants.radio:
-                                          {
-                                            RadioModel radioModel = RadioModel.fromJson(
-                                                jsonDecode(responseTxt!)['fields']
-                                                    .elementAt(i)["ob"]);
-                                            if (radioModel.validation!.isMandatory !=
-                                                null &&
-                                                radioModel.validation!.isMandatory!) {
-                                              if (radioValue[i]!.values.elementAt(0) == "null") {
-                                                radioVisible[i] = true;
-                                                setState(() {});
-                                                //CommonWidgets.showToast("Please select item !");
-                                              } else {
-                                                radioVisible[i] = false;
-                                                setState(() {});
-                                                log("Radio is ${radioValue[i]}");
-                                              }
-                                            }
-                                          }
-                                          break;
-                                        case Constants.checkBox:
-                                          {
-                                            log("chckbox ${checkBoxValue.elementAt(i).toString()}");
-                                            int selectedCount = 0;
-                                            CheckBoxModel checkboxModel =
-                                            CheckBoxModel.fromJson(
-                                                jsonDecode(responseTxt!)['fields']
-                                                    .elementAt(i)["ob"]);
-                                            for (int index = 0;
-                                            index <
-                                                checkBoxValue.elementAt(i)!.length;
-                                            index++) {
-                                              if (checkBoxValue.elementAt(i)![index] ==
-                                                  true) {
-                                                selectedCount++;
-                                              }
-                                            }
-                                            if (checkboxModel.validation!.minCheck! <=
-                                                selectedCount &&
-                                                selectedCount <=
-                                                    checkboxModel
-                                                        .validation!.maxCheck!) {
-                                              checkBoxVisible[i] = false;
-                                              setState(() {});
-                                            } else {
-                                              checkBoxVisible[i] = true;
-                                              setState(() {});
-                                            }
-                                          }
-                                          break;
-                                        case Constants.dropDown:
-                                          {
-                                            DropDownModel dropDownModel =
-                                            DropDownModel.fromJson(
-                                                jsonDecode(responseTxt!)['fields']
-                                                    .elementAt(i)["ob"]);
-                                            if (dropDownModel.validation!.isMandatory !=
-                                                null &&
-                                                dropDownModel
-                                                    .validation!.isMandatory!) {
-                                              if (dropDownValue[i]!.values.elementAt(0) == null) {
-                                                dropDownVisible[i] = true;
-                                                setState(() {});
-                                              } else {
-                                                dropDownVisible[i] = false;
-                                                setState(() {});
-                                              }
-                                            }
-                                          }
-                                          break;
-                                        case Constants.image:
-                                          {
-                                            ImageModel imageModel = ImageModel.fromJson(
-                                                jsonDecode(responseTxt!)['fields']
-                                                    .elementAt(i)["ob"]);
-                                            if (imageModel.validation!.isMandatory !=
-                                                null &&
-                                                imageModel
-                                                    .validation!.isMandatory!) {
-                                              if (imageFileList![i].path == "") {
-                                                imageVisible[i] = true;
-                                                setState(() {});
-                                                //CommonWidgets.showToast("Please select item !");
-                                              } else {
-                                                imageVisible[i] = false;
-                                                setState(() {});
-                                              }
-                                            }
-                                          }
-                                          break;
-                                        default:
-                                          log("");
-                                      }
-                                    }
-                                    if (_formKey.currentState!.validate()) {
-                                      if (!radioVisible.contains(true) &&
-                                          !checkBoxVisible.contains(true) &&
-                                          !dropDownVisible.contains(true)) {
-                                        CommonWidgets.showToast("All Done!!!!!!!");
-                                      }
-                                    }
-                                  },
-                                  child: const Text("Submit")),
-                            );
-                          }
-                          else {
-                            switch (uiModel.fields!.elementAt(i).type) {
-                              case Constants.shortText:
-                                return buildShortText(i);
-                              case Constants.radio:
-                                return buildRadio(i);
-                              case Constants.checkBox:
-                                return buildCheckBox(i);
-                              case Constants.dropDown:
-                                return buildDropDown(i);
-                              case Constants.image:
-                                return buildImage(i);
-                              default:
-                                return Container();
-                            }
-                          }
-                        }),
-                  ),
+            : Column(
+              children: [
+                Expanded(
+                  flex: 9,
+                  child: SingleChildScrollView(
+                      child: Form(
+                        key: _formKey,
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: buildPages()
+                        ),
+                      ),
+                    ),
                 ),
-              ));
+                Expanded(
+                    flex: 1,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
+                      Visibility(
+                        maintainSize: true,
+                        maintainState: true,
+                        maintainAnimation: true,
+                        visible: currentPage > 0 ? true : false,
+                        child: ElevatedButton(onPressed: (){
+                          setState(() {
+                            currentPage --;
+                          });
+                        }, child: Text("Prev")),
+                      ),
+                      Visibility(
+                        maintainSize: true,
+                        maintainAnimation: true,
+                        maintainState: true,
+                        visible: currentPage != totalPage -1 ,
+                        child: ElevatedButton(onPressed: (){
+                          setState(() {
+                            currentPage ++;
+                          });
+                        }, child: Text("Next")),
+                      )
+                ],))
+              ],
+            ));
   }
 }
