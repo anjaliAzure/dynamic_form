@@ -280,20 +280,20 @@ class _UserFormState extends State<UserForm> {
     );
   }
 
-  Widget buildImage(int idx){
-    ImageModel imageModel = ImageModel.fromJson(
-        jsonDecode(responseTxt!)['fields'].elementAt(idx)["ob"]);
+  Widget buildImage(int page , int idx){
+    ImageModel imageModel = ImageModel.fromJson(jsonDecode(responseTxt!)['fields'].elementAt(0)["page"].elementAt(page)["lists"].elementAt(idx)['ob']);
+    int id = jsonDecode(responseTxt!)['fields'].elementAt(0)["page"].elementAt(page)["lists"].elementAt(idx)['id'];
 
     return Visibility(
       visible: checkCondition(
           isDependent: imageModel.dependent ?? false,
-          value: imageModel.cond ?? []),
+          value: imageModel.cond ?? [], page: page),
       child: Column(
         mainAxisSize: MainAxisSize.max,
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          imageFileList![idx].path == ""
+          imageFileList![id].path == ""
            ? Padding(
              padding: const EdgeInsets.all(8.0),
              child: Container(
@@ -320,7 +320,7 @@ class _UserFormState extends State<UserForm> {
                               imageQuality: 100,
                             );
                             setState(() {
-                              imageFileList![idx] = pickedFile!;
+                              imageFileList![id] = pickedFile!;
                             });
                           },
                           style: ButtonStyle(
@@ -342,7 +342,7 @@ class _UserFormState extends State<UserForm> {
                               imageQuality: 100,
                             );
                             setState(() {
-                              imageFileList![idx] = pickedFile!;
+                              imageFileList![id] = pickedFile!;
                             });
                           },
                           style: ButtonStyle(
@@ -371,7 +371,7 @@ class _UserFormState extends State<UserForm> {
                     ElevatedButton(
                       onPressed: () async {
                         setState(() {
-                          imageFileList![idx] = XFile("");
+                          imageFileList![id] = XFile("");
                         });
                       },
                       style: ButtonStyle(
@@ -390,7 +390,7 @@ class _UserFormState extends State<UserForm> {
                   height: 150,
                   decoration: BoxDecoration(border: Border.all(color: Colors.black,)),
                   child: Image.file(
-                      File(imageFileList![idx].path),
+                      File(imageFileList![id].path),
                       errorBuilder: (BuildContext context, Object error,
                           StackTrace? stackTrace) =>
                       const Center(
@@ -401,7 +401,7 @@ class _UserFormState extends State<UserForm> {
             ),
           ),
           Visibility(
-            visible: imageVisible[idx]!,
+            visible: imageVisible[id]!,
             child: const Padding(
               padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
               child: Text(
@@ -431,6 +431,8 @@ class _UserFormState extends State<UserForm> {
                   return buildCheckBox(currentPage ,i);
                 case Constants.dropDown:
                   return buildDropDown(currentPage ,i);
+                case Constants.image:
+                  return buildImage(currentPage, i);
                 default:
                   return Container();
               }
@@ -441,13 +443,15 @@ class _UserFormState extends State<UserForm> {
   loadJson() async {
     responseTxt = await rootBundle.loadString("assets/form.json");
     uiModel = UiModel.fromJson(jsonDecode(responseTxt!));
-    radioValue = List.generate(15, (index) => null);// List.generate(uiModel.fields!.elementAt(0).page!.length, (index) => null);
-    radioVisible = List.generate(15, (index) => false);//List.generate(uiModel.fields!.elementAt(0).page!.length, (index) => false);
-    checkBoxVisible = List.generate(15, (index) => false);//List.generate(uiModel.fields!.elementAt(0).page!.length, (index) => false);
-    dropDownVisible = List.generate(15, (index) => false);//List.generate(uiModel.fields!.elementAt(0).page!.length, (index) => false);
-    dropDownValue = List.generate(15, (index) => null);//List.generate(uiModel.fields!.elementAt(0).page!.length, (index) => null);
-    checkBoxValue = List.generate(15, (index) => <int, bool>{});//List.generate(uiModel.fields!.elementAt(0).page!.length, (index) => <int, bool>{});
-    editTexts = List.generate(15, (index) => null);//List.generate(uiModel.fields!.elementAt(0).page!.length, (index) => null);
+    radioValue = List.generate(uiModel.noOfFields!, (index) => null);
+    radioVisible = List.generate(uiModel.noOfFields!, (index) => false);
+    checkBoxVisible = List.generate(uiModel.noOfFields!, (index) => false);
+    dropDownVisible = List.generate(uiModel.noOfFields!, (index) => false);
+    dropDownValue = List.generate(uiModel.noOfFields!, (index) => null);
+    imageVisible = List.generate(uiModel.noOfFields!, (index) => false);
+    imageFileList = List.generate(uiModel.fields!.length, (index) => XFile(""));
+    checkBoxValue = List.generate(uiModel.noOfFields!, (index) => <int, bool>{});
+    editTexts = List.generate(uiModel.noOfFields!, (index) => null);
 
     log("check le ${checkBoxValue.length}");
 
@@ -477,6 +481,10 @@ class _UserFormState extends State<UserForm> {
             {
               dropDownValue.insert(element.id!, {-1: null});
             }
+            break;
+          case Constants.image :
+            imageFileList = List.generate(uiModel.noOfFields!, (index) => XFile(""));
+            break;
         }
       });
 
@@ -563,6 +571,26 @@ class _UserFormState extends State<UserForm> {
     //         }
     //       }
     //       break;
+    // case Constants.image:
+    // {
+    // ImageModel imageModel = ImageModel.fromJson(
+    // jsonDecode(responseTxt!)['fields']
+    //     .elementAt(i)["ob"]);
+    // if (imageModel.validation!.isMandatory !=
+    // null &&
+    // imageModel
+    //     .validation!.isMandatory!) {
+    // if (imageFileList![i].path == "") {
+    // imageVisible[i] = true;
+    // setState(() {});
+    // //CommonWidgets.showToast("Please select item !");
+    // } else {
+    // imageVisible[i] = false;
+    // setState(() {});
+    // }
+    // }
+    // }
+    // break;
     //     default:
     //       log("");
     //   }

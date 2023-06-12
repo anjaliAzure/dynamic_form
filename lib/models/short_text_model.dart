@@ -13,9 +13,9 @@ class ShortTextModel {
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['label'] = this.label;
-    if (this.validation != null) {
-      data['validation'] = this.validation!.toJson();
+    data['label'] = label;
+    if (validation != null) {
+      data['validation'] = validation!.toJson();
     }
     return data;
   }
@@ -36,9 +36,9 @@ class Validation {
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['content_type'] = this.contentType;
-    data['input_type'] = this.inputType;
-    data['length'] = this.length;
+    data['content_type'] = contentType;
+    data['input_type'] = inputType;
+    data['length'] = length;
     return data;
   }
 }

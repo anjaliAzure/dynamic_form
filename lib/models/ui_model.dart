@@ -1,22 +1,25 @@
 class UiModel {
   List<Fields>? fields;
+  int? noOfFields;
 
-  UiModel({this.fields});
+  UiModel({this.fields, this.noOfFields});
 
   UiModel.fromJson(Map<String, dynamic> json) {
     if (json['fields'] != null) {
       fields = <Fields>[];
       json['fields'].forEach((v) {
-        fields!.add(new Fields.fromJson(v));
+        fields!.add(Fields.fromJson(v));
       });
     }
+    noOfFields = json['no_of_fields'];
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
+    final Map<String, dynamic> data = <String, dynamic>{};
     if (this.fields != null) {
       data['fields'] = this.fields!.map((v) => v.toJson()).toList();
     }
+    data['no_of_fields'] = noOfFields;
     return data;
   }
 }
@@ -30,13 +33,13 @@ class Fields {
     if (json['page'] != null) {
       page = <Page>[];
       json['page'].forEach((v) {
-        page!.add(new Page.fromJson(v));
+        page!.add(Page.fromJson(v));
       });
     }
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
+    final Map<String, dynamic> data = <String, dynamic>{};
     if (this.page != null) {
       data['page'] = this.page!.map((v) => v.toJson()).toList();
     }
@@ -55,13 +58,13 @@ class Page {
     if (json['lists'] != null) {
       lists = <Lists>[];
       json['lists'].forEach((v) {
-        lists!.add(new Lists.fromJson(v));
+        lists!.add(Lists.fromJson(v));
       });
     }
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
+    final Map<String, dynamic> data = <String, dynamic>{};
     data['page_no'] = this.pageNo;
     if (this.lists != null) {
       data['lists'] = this.lists!.map((v) => v.toJson()).toList();
@@ -80,11 +83,11 @@ class Lists {
   Lists.fromJson(Map<String, dynamic> json) {
     type = json['type'];
     id = json['id'];
-    ob = json['ob'] != null ? new Ob.fromJson(json['ob']) : null;
+    ob = json['ob'] != null ? Ob.fromJson(json['ob']) : null;
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
+    final Map<String, dynamic> data = <String, dynamic>{};
     data['type'] = this.type;
     data['id'] = this.id;
     if (this.ob != null) {
@@ -109,7 +112,7 @@ class Ob {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
+    final Map<String, dynamic> data = <String, dynamic>{};
     data['label'] = this.label;
     data['values'] = this.values;
     data['validation'] = this.validation;
