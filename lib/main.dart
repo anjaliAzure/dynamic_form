@@ -1,8 +1,6 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show rootBundle;
 import 'package:test2/app_screens/form_1.dart';
+import 'package:test2/common_utilities/common_widgets.dart';
 
 void main() {
   runApp(const MyApp());
@@ -34,12 +32,13 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    CommonWidgets().initControllers();
   }
+
   @override
   Widget build(BuildContext context) {
     return UserForm();
