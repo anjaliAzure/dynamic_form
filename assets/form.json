@@ -1,5 +1,5 @@
 {
-  "no_of_fields" : 18,
+  "no_of_fields": 18,
   "fields": [
     {
       "page": [
@@ -7,7 +7,7 @@
           "page_no": 1,
           "lists": [
             {
-              "type": "short_text",
+              "type": "text",
               "id": 0,
               "ob": {
                 "label": "Enter Name",
@@ -22,7 +22,7 @@
               }
             },
             {
-              "type": "short_text",
+              "type": "text",
               "id": 1,
               "ob": {
                 "label": "Enter email",

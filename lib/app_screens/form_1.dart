@@ -5,11 +5,12 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:get/get.dart';
-
 import 'package:image_picker/image_picker.dart';
 import 'package:test2/app_constants/constants.dart';
 import 'package:test2/get_controllers/checkbox_controller.dart';
+import 'package:test2/get_controllers/image_controller.dart';
 import 'package:test2/get_controllers/radio_controller.dart';
+import 'package:test2/get_controllers/text_controller.dart';
 import 'package:test2/models/checkBoxModel.dart';
 import 'package:test2/models/condition_model.dart' as ConditionModel;
 import 'package:test2/models/dropdown_model.dart';
@@ -19,6 +20,7 @@ import 'package:test2/models/short_text_model.dart';
 import 'package:test2/models/ui_model.dart';
 
 import '../common_utilities/common_widgets.dart';
+import '../get_controllers/drop_down_controller.dart';
 
 class UserForm extends StatefulWidget {
   const UserForm({Key? key}) : super(key: key);
@@ -32,18 +34,23 @@ class _UserFormState extends State<UserForm> {
   late int totalPage;
   String? responseTxt;
   late UiModel uiModel;
-  late List<Map<int, String>?> radioValue;
-  late List<bool?> radioVisible, checkBoxVisible, dropDownVisible, imageVisible;
-  late List<Map<int, dynamic>?> dropDownValue;
-  late List<Map<int, bool>?> checkBoxValue;
-  late List<String?> editTexts;
-  late List<XFile>? imageFileList;
+
+  //late List<Map<int, String>?> radioValue;
+  //late List<bool?> radioVisible, checkBoxVisible, dropDownVisible, imageVisible;
+
+  //late List<Map<int, dynamic>?> dropDownValue;
+  //late List<Map<int, bool>?> checkBoxValue;
+  //late List<String?> editTexts;
+  //late List<XFile>? imageFileList;
   final ImagePicker picker = ImagePicker();
 
   final _formKey = GlobalKey<FormState>();
 
   RadioController radioValueController = Get.find<RadioController>();
+  DropDownController dropDownValueController = Get.find<DropDownController>();
   CheckboxController checkboxController = Get.find<CheckboxController>();
+  ImageController imageController = Get.find<ImageController>();
+  TextController textController = Get.find<TextController>();
 
   bool checkCondition(
       {required bool isDependent,
@@ -70,11 +77,11 @@ class _UserFormState extends State<UserForm> {
             .lists!
             .singleWhere((element) => element.id == conditionModel.id)
             .type) {
+          ///  check if the element on which current field is dependent is selected or not
           case Constants.radio:
             {
-              ///  check if the element on which current field is dependent is selected or not
               if (radioValueController
-                      .radioValue.value[conditionModel.id]!.keys.first ==
+                      .radioValue[conditionModel.id]!.keys.first ==
                   conditionModel.subId) {
                 return false;
               }
@@ -86,14 +93,13 @@ class _UserFormState extends State<UserForm> {
               for (int index = 0;
                   index <
                       checkboxController
-                          .checkboxValue.value[conditionModel.id!]!.keys.length;
+                          .checkboxValue[conditionModel.id!]!.keys.length;
                   index++) {
-                if (checkboxController
-                            .checkboxValue.value[conditionModel.id!]!.keys
+                if (checkboxController.checkboxValue[conditionModel.id!]!.keys
                             .elementAt(index) ==
                         conditionModel.subId &&
                     checkboxController
-                            .checkboxValue.value[conditionModel.id!]![index] ==
+                            .checkboxValue[conditionModel.id!]![index] ==
                         true) {
                   return false;
                 }
@@ -101,7 +107,8 @@ class _UserFormState extends State<UserForm> {
             }
             break;
           case Constants.dropDown:
-            if (dropDownValue[conditionModel.id!]!.keys.first ==
+            if (dropDownValueController
+                    .dropDownValue[conditionModel.id!]!.keys.first ==
                 conditionModel.subId) {
               return true;
             } else {
@@ -115,11 +122,14 @@ class _UserFormState extends State<UserForm> {
   }
 
   Widget buildShortText(int page, int idx) {
+    /// idx is the index of the list
     ShortTextModel shortTextModel = ShortTextModel.fromJson(
         jsonDecode(responseTxt!)['fields']
             .elementAt(0)["page"]
             .elementAt(page)["lists"]
             .elementAt(idx)['ob']);
+
+    /// id is the id of the field
     int id = jsonDecode(responseTxt!)['fields']
         .elementAt(0)["page"]
         .elementAt(page)["lists"]
@@ -148,7 +158,8 @@ class _UserFormState extends State<UserForm> {
         },
         decoration: InputDecoration(label: Text(shortTextModel.label!)),
         onChanged: (value) {
-          editTexts[id] = value;
+          textController.editTextList[id] = value;
+          textController.update();
         },
       ),
     );
@@ -168,18 +179,18 @@ class _UserFormState extends State<UserForm> {
         .elementAt(page)["lists"]
         .elementAt(idx)['id'];
 
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            for (int i = 0; i < radioModel.values!.length; i++)
-              GetBuilder<RadioController>(
-                  init: RadioController(),
-                  builder: (context) {
-                    return Visibility(
+    return GetBuilder<RadioController>(
+        init: RadioController(),
+        builder: (context) {
+          return Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  for (int i = 0; i < radioModel.values!.length; i++)
+                    Visibility(
                       visible: checkCondition(
                           isDependent: radioModel.dependent ?? false,
                           value: radioModel.values!.elementAt(i).cond ?? [],
@@ -190,7 +201,7 @@ class _UserFormState extends State<UserForm> {
                               toggleable: true,
                               value: radioModel.values!.elementAt(i).value,
                               groupValue: radioValueController
-                                  .radioValue.value[id]!.values.first,
+                                  .radioValue[id]!.values.first,
                               onChanged: (value) {
                                 if (value == null) {
                                   radioValueController.radioValue[id] = {
@@ -207,85 +218,96 @@ class _UserFormState extends State<UserForm> {
                           Text(radioModel.values!.elementAt(i).value!)
                         ],
                       ),
-                    );
-                  }),
-          ],
-        ),
-        Visibility(
-          visible: radioVisible[id]!,
-          child: const Padding(
-            padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
-            child: Text(
-              "Please Choose One",
-              style: TextStyle(color: Colors.red),
-            ),
-          ),
-        )
-      ],
-    );
+                    ),
+                ],
+              ),
+              Visibility(
+                visible: radioValueController.radioVisible[id]!,
+                child: const Padding(
+                  padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
+                  child: Text(
+                    "Please Choose One",
+                    style: TextStyle(color: Colors.red),
+                  ),
+                ),
+              )
+            ],
+          );
+        });
   }
 
   Widget buildDropDown(int page, int idx) {
+    /// idx is the index of the list
     DropDownModel dropDownModel = DropDownModel.fromJson(
         jsonDecode(responseTxt!)['fields']
             .elementAt(0)["page"]
             .elementAt(page)["lists"]
             .elementAt(idx)['ob']);
 
+    /// id is the id of the field
     int id = jsonDecode(responseTxt!)['fields']
         .elementAt(0)["page"]
         .elementAt(page)["lists"]
         .elementAt(idx)['id'];
-    return Visibility(
-      visible: checkCondition(
-          isDependent: dropDownModel.dependent ?? false,
-          value: dropDownModel.cond ?? [],
-          page: page),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          DropdownButton(
-            hint: const Text('Please choose a location'),
-            // Not necessary for Option 1
-            value: dropDownValue.elementAt(id)!.values.first,
-            onChanged: (newValue) {
-              setState(() {
-                int index = 0;
-                dropDownModel.values?.forEach((element) {
-                  if (element.value == newValue) {
-                    index = element.id!;
-                    return;
-                  }
-                });
-                dropDownValue[id] = {index: newValue.toString()};
-                //dropDownValue[idx]![] = newValue;
-              });
-            },
-            items: dropDownModel.values!
-                .map((c) => c.value)
-                .toList()
-                .map((location) {
-              return DropdownMenuItem(
-                value: location,
-                child: Text(location!),
-              );
-            }).toList(),
-          ),
-          Visibility(
-            visible: dropDownVisible[id]!,
-            child: const Padding(
-              padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
-              child: Text(
-                "Please Choose one",
-                style: TextStyle(color: Colors.red),
-              ),
+    return GetBuilder<DropDownController>(
+        init: DropDownController(),
+        builder: (context) {
+          return Visibility(
+            visible: checkCondition(
+                isDependent: dropDownModel.dependent ?? false,
+                value: dropDownModel.cond ?? [],
+                page: page),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                DropdownButton(
+                  hint: Text(dropDownModel.label.toString()),
+                  // Not necessary for Option 1
+                  value:
+                      dropDownValueController.dropDownValue[id]!.values.first,
+                  onChanged: (newValue) {
+                    //setState(() {
+                    int index = 0;
+                    dropDownModel.values?.forEach((element) {
+                      if (element.value == newValue) {
+                        index = element.id!;
+                        return;
+                      }
+                    });
+                    dropDownValueController.dropDownValue[id] = {
+                      index: newValue.toString()
+                    };
+                    dropDownValueController.update();
+                    //dropDownValue[id] = {index: newValue.toString()};
+                    //dropDownValue[idx]![] = newValue;
+                    //});
+                  },
+                  items: dropDownModel.values!
+                      .map((c) => c.value)
+                      .toList()
+                      .map((location) {
+                    return DropdownMenuItem(
+                      value: location,
+                      child: Text(location!),
+                    );
+                  }).toList(),
+                ),
+                Visibility(
+                  visible: dropDownValueController.dropDownVisible[id]!,
+                  child: const Padding(
+                    padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
+                    child: Text(
+                      "Please Choose one",
+                      style: TextStyle(color: Colors.red),
+                    ),
+                  ),
+                )
+              ],
             ),
-          )
-        ],
-      ),
-    );
+          );
+        });
   }
 
   Widget buildCheckBox(int page, int idx) {
@@ -323,8 +345,7 @@ class _UserFormState extends State<UserForm> {
                           Checkbox(
                             checkColor: Colors.white,
                             activeColor: Colors.blue,
-                            value: checkboxController
-                                .checkboxValue.value[id]!.values
+                            value: checkboxController.checkboxValue[id]!.values
                                 .elementAt(i),
                             //checkBoxValue.elementAt(id)![i],
                             onChanged: (bool? value) {
@@ -340,7 +361,7 @@ class _UserFormState extends State<UserForm> {
           ],
         ),
         Visibility(
-          visible: checkBoxVisible[id]!,
+          visible: checkboxController.checkBoxVisible[id]!,
           child: Padding(
             padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
             child: Text(
@@ -367,152 +388,160 @@ class _UserFormState extends State<UserForm> {
         .elementAt(page)["lists"]
         .elementAt(idx)['id'];
 
-    return Visibility(
-      visible: checkCondition(
-          isDependent: imageModel.dependent ?? false,
-          value: imageModel.cond ?? [],
-          page: page),
-      child: Column(
-        mainAxisSize: MainAxisSize.max,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          imageFileList![id].path == ""
-              ? Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Container(
-                    //width: 80,
-                    //height: 80,
-                    decoration: BoxDecoration(
-                        border: Border.all(
-                      color: Colors.black26,
-                    )),
-                    child: Padding(
-                      padding: const EdgeInsets.all(4.0),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.max,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            imageModel.label!,
+    return GetBuilder<ImageController>(
+        init: ImageController(),
+        builder: (context) {
+          return Visibility(
+            visible: checkCondition(
+                isDependent: imageModel.dependent ?? false,
+                value: imageModel.cond ?? [],
+                page: page),
+            child: Column(
+              mainAxisSize: MainAxisSize.max,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                imageController.imageFileList[id]!.path == ""
+                    ? Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Container(
+                          //width: 80,
+                          //height: 80,
+                          decoration: BoxDecoration(
+                              border: Border.all(
+                            color: Colors.black26,
+                          )),
+                          child: Padding(
+                            padding: const EdgeInsets.all(4.0),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.max,
+                              crossAxisAlignment: CrossAxisAlignment.center,
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  imageModel.label!,
+                                ),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    ElevatedButton(
+                                      onPressed: () async {
+                                        final XFile? pickedFile =
+                                            await picker.pickImage(
+                                          source: ImageSource.camera,
+                                          maxWidth: 100,
+                                          maxHeight: 100,
+                                          imageQuality: 100,
+                                        );
+                                        imageController.imageFileList[id] =
+                                            pickedFile!;
+                                        imageController.update();
+                                      },
+                                      style: ButtonStyle(
+                                          shape: MaterialStateProperty.all<
+                                                  RoundedRectangleBorder>(
+                                              RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          18.0),
+                                                  side: const BorderSide(
+                                                      color: Colors.grey)))),
+                                      child:
+                                          const Icon(Icons.camera_alt_outlined),
+                                    ),
+                                    const SizedBox(
+                                      width: 10,
+                                    ),
+                                    ElevatedButton(
+                                      onPressed: () async {
+                                        final XFile? pickedFile =
+                                            await picker.pickImage(
+                                          source: ImageSource.gallery,
+                                          maxWidth: 100,
+                                          maxHeight: 100,
+                                          imageQuality: 100,
+                                        );
+                                        imageController.imageFileList[id] =
+                                            pickedFile!;
+                                        imageController.update();
+                                      },
+                                      style: ButtonStyle(
+                                          shape: MaterialStateProperty.all<
+                                                  RoundedRectangleBorder>(
+                                              RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          18.0),
+                                                  side: const BorderSide(
+                                                      color: Colors.grey)))),
+                                      child: const Icon(
+                                          Icons.photo_library_outlined),
+                                    )
+                                  ],
+                                ),
+                              ],
+                            ),
                           ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              ElevatedButton(
-                                onPressed: () async {
-                                  final XFile? pickedFile =
-                                      await picker.pickImage(
-                                    source: ImageSource.camera,
-                                    maxWidth: 100,
-                                    maxHeight: 100,
-                                    imageQuality: 100,
-                                  );
-                                  setState(() {
-                                    imageFileList![id] = pickedFile!;
-                                  });
-                                },
-                                style: ButtonStyle(
-                                    shape: MaterialStateProperty.all<
-                                            RoundedRectangleBorder>(
-                                        RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(18.0),
-                                            side: const BorderSide(
-                                                color: Colors.grey)))),
-                                child: const Icon(Icons.camera_alt_outlined),
+                        ),
+                      )
+                    : Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Column(
+                          children: [
+                            Row(
+                              children: [
+                                const Expanded(child: SizedBox()),
+                                ElevatedButton(
+                                  onPressed: () async {
+                                    imageController.imageFileList[id] =
+                                        XFile("");
+                                    imageController.update();
+                                  },
+                                  style: ButtonStyle(
+                                      shape: MaterialStateProperty.all<
+                                              RoundedRectangleBorder>(
+                                          RoundedRectangleBorder(
+                                              borderRadius:
+                                                  BorderRadius.circular(18.0),
+                                              side: const BorderSide(
+                                                  color: Colors.white)))),
+                                  child: const Icon(Icons.cancel_outlined),
+                                ),
+                              ],
+                            ),
+                            Container(
+                              width: 200,
+                              height: 150,
+                              decoration: BoxDecoration(
+                                  border: Border.all(
+                                color: Colors.black,
+                              )),
+                              child: Image.file(
+                                File(imageController.imageFileList[id]!.path),
+                                errorBuilder: (BuildContext context,
+                                        Object error, StackTrace? stackTrace) =>
+                                    const Center(
+                                        child: Text(
+                                            'This image type is not supported')),
                               ),
-                              const SizedBox(
-                                width: 10,
-                              ),
-                              ElevatedButton(
-                                onPressed: () async {
-                                  final XFile? pickedFile =
-                                      await picker.pickImage(
-                                    source: ImageSource.gallery,
-                                    maxWidth: 100,
-                                    maxHeight: 100,
-                                    imageQuality: 100,
-                                  );
-                                  setState(() {
-                                    imageFileList![id] = pickedFile!;
-                                  });
-                                },
-                                style: ButtonStyle(
-                                    shape: MaterialStateProperty.all<
-                                            RoundedRectangleBorder>(
-                                        RoundedRectangleBorder(
-                                            borderRadius:
-                                                BorderRadius.circular(18.0),
-                                            side: const BorderSide(
-                                                color: Colors.grey)))),
-                                child: const Icon(Icons.photo_library_outlined),
-                              )
-                            ],
-                          ),
-                        ],
+                            ),
+                          ],
+                        ),
                       ),
+                Visibility(
+                  visible: imageController.imageVisible[id]!,
+                  child: const Padding(
+                    padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
+                    child: Text(
+                      "Please add required image",
+                      style: TextStyle(color: Colors.red),
                     ),
                   ),
                 )
-              : Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    children: [
-                      Row(
-                        children: [
-                          const Expanded(child: SizedBox()),
-                          ElevatedButton(
-                            onPressed: () async {
-                              setState(() {
-                                imageFileList![id] = XFile("");
-                              });
-                            },
-                            style: ButtonStyle(
-                                shape: MaterialStateProperty.all<
-                                        RoundedRectangleBorder>(
-                                    RoundedRectangleBorder(
-                                        borderRadius:
-                                            BorderRadius.circular(18.0),
-                                        side: const BorderSide(
-                                            color: Colors.white)))),
-                            child: const Icon(Icons.cancel_outlined),
-                          ),
-                        ],
-                      ),
-                      Container(
-                        width: 200,
-                        height: 150,
-                        decoration: BoxDecoration(
-                            border: Border.all(
-                          color: Colors.black,
-                        )),
-                        child: Image.file(
-                          File(imageFileList![id].path),
-                          errorBuilder: (BuildContext context, Object error,
-                                  StackTrace? stackTrace) =>
-                              const Center(
-                                  child:
-                                      Text('This image type is not supported')),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-          Visibility(
-            visible: imageVisible[id]!,
-            child: const Padding(
-              padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
-              child: Text(
-                "Please add required image",
-                style: TextStyle(color: Colors.red),
-              ),
+              ],
             ),
-          )
-        ],
-      ),
-    );
+          );
+        });
   }
 
   Widget buildPages() {
@@ -531,7 +560,7 @@ class _UserFormState extends State<UserForm> {
                   .lists!
                   .elementAt(i)
                   .type) {
-                case Constants.shortText:
+                case Constants.text:
                   return buildShortText(currentPage, i);
                 case Constants.radio:
                   return buildRadio(currentPage, i);
@@ -551,18 +580,22 @@ class _UserFormState extends State<UserForm> {
   loadJson() async {
     responseTxt = await rootBundle.loadString("assets/form.json");
     uiModel = UiModel.fromJson(jsonDecode(responseTxt!));
-    radioValue = List.generate(uiModel.noOfFields!, (index) => null);
-    radioVisible = List.generate(uiModel.noOfFields!, (index) => false);
-    checkBoxVisible = List.generate(uiModel.noOfFields!, (index) => false);
-    dropDownVisible = List.generate(uiModel.noOfFields!, (index) => false);
-    dropDownValue = List.generate(uiModel.noOfFields!, (index) => null);
-    imageVisible = List.generate(uiModel.noOfFields!, (index) => false);
-    imageFileList = List.generate(uiModel.fields!.length, (index) => XFile(""));
-    checkBoxValue =
-        List.generate(uiModel.noOfFields!, (index) => <int, bool>{});
-    editTexts = List.generate(uiModel.noOfFields!, (index) => null);
+    //radioValue = List.generate(uiModel.noOfFields!, (index) => null);
+    radioValueController.radioVisible =
+        RxList.generate(uiModel.noOfFields!, (index) => false);
+    checkboxController.checkBoxVisible =
+        RxList.generate(uiModel.noOfFields!, (index) => false);
+    dropDownValueController.dropDownVisible =
+        RxList.generate(uiModel.noOfFields!, (index) => false);
+    //dropDownValue = List.generate(uiModel.noOfFields!, (index) => null);
+    imageController.imageVisible =
+        RxList.generate(uiModel.noOfFields!, (index) => false);
+    //imageFileList = List.generate(uiModel.fields!.length, (index) => XFile(""));
+    //checkBoxValue =
+    //    List.generate(uiModel.noOfFields!, (index) => <int, bool>{});
+    //editTexts = List.generate(uiModel.noOfFields!, (index) => null);
 
-    log("check le ${checkBoxValue.length}");
+    //log("check le ${checkBoxValue.length}");
 
     totalPage = uiModel.fields!.elementAt(0).page!.length;
 
@@ -570,6 +603,12 @@ class _UserFormState extends State<UserForm> {
     uiModel.fields!.elementAt(0).page!.forEach((element) {
       element.lists!.forEach((element) {
         switch (element.type) {
+          case Constants.text:
+            {
+              textController.editTextList[element.id!] = null;
+            }
+            break;
+
           case Constants.radio:
             {
               radioValueController.radioValue[element.id!] = {-1: "null"};
@@ -595,12 +634,12 @@ class _UserFormState extends State<UserForm> {
 
           case Constants.dropDown:
             {
-              dropDownValue.insert(element.id!, {-1: null});
+              dropDownValueController.dropDownValue[element.id!] = {-1: null};
+              //dropDownValue.insert(element.id!, {-1: null});
             }
             break;
           case Constants.image:
-            imageFileList =
-                List.generate(uiModel.noOfFields!, (index) => XFile(""));
+            imageController.imageFileList[element.id!] = XFile("");
             break;
         }
       });
@@ -620,7 +659,7 @@ class _UserFormState extends State<UserForm> {
             .lists!
             .elementAt(j)
             .id!;
-        log("id is $id");
+        //log("id is $id");
         switch (uiModel.fields!
             .elementAt(0)
             .page!
@@ -628,9 +667,9 @@ class _UserFormState extends State<UserForm> {
             .lists!
             .elementAt(j)
             .type) {
-          case Constants.shortText:
+          case Constants.text:
             {
-              log("Text is ${editTexts.elementAt(i)}");
+              log("Text is ${textController.editTextList[i]}");
             }
             break;
           case Constants.radio:
@@ -642,21 +681,20 @@ class _UserFormState extends State<UserForm> {
                       .elementAt(j)['ob']);
               if (radioModel.validation!.isMandatory != null &&
                   radioModel.validation!.isMandatory!) {
-                if (radioValue[id]!.values.elementAt(0) == "null") {
-                  radioVisible[id] = true;
-                  setState(() {});
-                  //CommonWidgets.showToast("Please select item !");
+                if (radioValueController.radioValue[id]!.values.elementAt(0) ==
+                    "null") {
+                  radioValueController.radioVisible[id] = true;
+                  radioValueController.update();
                 } else {
-                  radioVisible[id] = false;
-                  setState(() {});
-                  log("Radio is ${radioValue[id]}");
+                  radioValueController.radioVisible[id] = false;
+                  radioValueController.update();
                 }
               }
             }
             break;
           case Constants.checkBox:
             {
-              log("chckbox ${checkBoxValue.elementAt(i).toString()}");
+              //log("chckbox ${checkboxController.checkboxValue[id].toString()}");
               int selectedCount = 0;
               CheckBoxModel checkboxModel = CheckBoxModel.fromJson(
                   jsonDecode(responseTxt!)['fields']
@@ -664,19 +702,19 @@ class _UserFormState extends State<UserForm> {
                       .elementAt(i)["lists"]
                       .elementAt(j)['ob']);
               for (int index = 0;
-                  index < checkBoxValue.elementAt(i)!.length;
+                  index < checkboxController.checkboxValue[id]!.length;
                   index++) {
-                if (checkBoxValue.elementAt(i)![index] == true) {
+                if (checkboxController.checkboxValue[id]![index] == true) {
                   selectedCount++;
                 }
               }
               if (checkboxModel.validation!.minCheck! <= selectedCount &&
                   selectedCount <= checkboxModel.validation!.maxCheck!) {
-                checkBoxVisible[id] = false;
-                setState(() {});
+                checkboxController.checkBoxVisible[id] = false;
+                checkboxController.update();
               } else {
-                checkBoxVisible[id] = true;
-                setState(() {});
+                checkboxController.checkBoxVisible[id] = true;
+                checkboxController.update();
               }
             }
             break;
@@ -689,12 +727,14 @@ class _UserFormState extends State<UserForm> {
                       .elementAt(j)['ob']);
               if (dropDownModel.validation!.isMandatory != null &&
                   dropDownModel.validation!.isMandatory!) {
-                if (dropDownValue[id]!.values.elementAt(0) == null) {
-                  dropDownVisible[id] = true;
-                  setState(() {});
+                if (dropDownValueController.dropDownValue[id]!.values
+                        .elementAt(0) ==
+                    null) {
+                  dropDownValueController.dropDownVisible[id] = true;
+                  dropDownValueController.update();
                 } else {
-                  dropDownVisible[id] = false;
-                  setState(() {});
+                  dropDownValueController.dropDownVisible[id] = false;
+                  dropDownValueController.update();
                 }
               }
             }
@@ -708,13 +748,12 @@ class _UserFormState extends State<UserForm> {
                       .elementAt(j)['ob']);
               if (imageModel.validation!.isMandatory != null &&
                   imageModel.validation!.isMandatory!) {
-                if (imageFileList![id].path == "") {
-                  imageVisible[id] = true;
-                  setState(() {});
-                  //CommonWidgets.showToast("Please select item !");
+                if (imageController.imageFileList[id]!.path == "") {
+                  imageController.imageVisible[id] = true;
+                  imageController.update();
                 } else {
-                  imageVisible[id] = false;
-                  setState(() {});
+                  imageController.imageVisible[id] = false;
+                  imageController.update();
                 }
               }
             }
@@ -727,9 +766,9 @@ class _UserFormState extends State<UserForm> {
 
     for (int i = 0; i < uiModel.fields!.length; i++) {}
     if (_formKey.currentState!.validate()) {
-      if (!radioVisible.contains(true) &&
-          !checkBoxVisible.contains(true) &&
-          !dropDownVisible.contains(true)) {
+      if (!radioValueController.radioVisible.contains(true) &&
+          !checkboxController.checkBoxVisible.contains(true) &&
+          !dropDownValueController.dropDownVisible.contains(true)) {
         CommonWidgets.showToast("All Done!!!!!!!");
       }
     }
@@ -740,14 +779,14 @@ class _UserFormState extends State<UserForm> {
     // TODO: implement initState
     super.initState();
     loadJson();
-    radioValueController.radioValue.listen((p0) {
-      p0.forEach((key, value) {
-        print("\n - $key");
-        value.forEach((key, value) {
-          print("\n key $key value $value");
-        });
-      });
-    });
+    // radioValueController.radioValue.listen((p0) {
+    //   p0.forEach((key, value) {
+    //     print("\n - $key");
+    //     value.forEach((key, value) {
+    //       print("\n key $key value $value");
+    //     });
+    //   });
+    // });
   }
 
   @override
