@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:test2/app_screens/form_1.dart';
-import 'package:test2/common_utilities/common_widgets.dart';
+import 'package:get/get_navigation/src/root/get_material_app.dart';
+import 'package:test2/app_screens/home.dart';
+import 'utilities/get_binding.dart';
 
 void main() {
   runApp(const MyApp());
@@ -12,7 +13,8 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
+      initialBinding: AppBinding(),
       debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       theme: ThemeData(
@@ -36,7 +38,6 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    CommonWidgets().initControllers();
   }
 
   @override
