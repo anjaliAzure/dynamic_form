@@ -3,5 +3,13 @@ import 'package:image_picker/image_picker.dart';
 
 class ImageController extends GetxController {
   RxMap<int, XFile> imageFileList = <int, XFile>{}.obs;
-  RxList<bool?> imageVisible = <bool?>[].obs;
+  RxMap<int, bool?> imageVisible = <int, bool?>{}.obs;
+
+  setImageFileList(int id, XFile value) {
+    imageFileList[id] = value;
+  }
+
+  setImageVisible(int id, bool? value) {
+    imageVisible[id] = value;
+  }
 }
