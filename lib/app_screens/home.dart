@@ -1,4 +1,5 @@
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:get/get.dart';
@@ -15,7 +16,6 @@ class UserForm extends StatefulWidget {
 }
 
 class _UserFormState extends State<UserForm> {
-
   String? responseTxt;
   late UiModel uiModel;
   final _formKey = GlobalKey<FormState>();
@@ -24,8 +24,7 @@ class _UserFormState extends State<UserForm> {
 
   Widget buildPages() {
     return responseTxt != null
-        ?
-        Obx(() =>  ListView.builder(
+        ? Obx(() => ListView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: uiModel.fields!.first.page!
@@ -40,40 +39,50 @@ class _UserFormState extends State<UserForm> {
                   .elementAt(i)
                   .type) {
                 case Constants.text:
-                  return UtilityWidgets().buildShortText(pageController.currentPage.value, i, responseTxt!, uiModel);
+                  return UtilityWidgets().buildShortText(
+                      pageController.currentPage.value,
+                      i,
+                      responseTxt!,
+                      uiModel);
                 case Constants.radio:
-                  return UtilityWidgets().buildRadio(pageController.currentPage.value, i ,  responseTxt!, uiModel);
+                  return UtilityWidgets().buildRadio(
+                      pageController.currentPage.value,
+                      i,
+                      responseTxt!,
+                      uiModel);
                 case Constants.checkBox:
-                  return UtilityWidgets().buildCheckBox(pageController.currentPage.value, i, responseTxt!, uiModel);
+                  return UtilityWidgets().buildCheckBox(
+                      pageController.currentPage.value,
+                      i,
+                      responseTxt!,
+                      uiModel);
                 case Constants.dropDown:
-                  return UtilityWidgets().buildDropDown(pageController.currentPage.value, i, responseTxt!, uiModel);
+                  return UtilityWidgets().buildDropDown(
+                      pageController.currentPage.value,
+                      i,
+                      responseTxt!,
+                      uiModel);
                 case Constants.image:
-                  return UtilityWidgets().buildImage(pageController.currentPage.value, i, responseTxt!, uiModel);
+                  return UtilityWidgets().buildImage(
+                      pageController.currentPage.value,
+                      i,
+                      responseTxt!,
+                      uiModel);
                 default:
                   return Container();
               }
             }))
-        : Container();
+        : const CircularProgressIndicator(
+            color: Colors.deepPurple,
+          );
   }
 
   loadJson() async {
     responseTxt = await rootBundle.loadString("assets/form.json");
     uiModel = UiModel.fromJson(jsonDecode(responseTxt!));
-
     UtilityWidgets().initFields(uiModel);
-    // radioValueController.radioVisible =
-    //     RxList.generate(uiModel.noOfFields!, (index) => false);
-    // checkboxController.checkBoxVisible =
-    //     RxList.generate(uiModel.noOfFields!, (index) => false);
-    // dropDownValueController.dropDownVisible =
-    //     RxList.generate(uiModel.noOfFields!, (index) => false);
-    // imageController.imageVisible =
-    //     RxList.generate(uiModel.noOfFields!, (index) => false);
-
-    pageController.totalPage.value = uiModel.fields!.elementAt(0).page!.length;
-    setState(() {
-
-    });
+    pageController.setTotalPage(uiModel.fields!.elementAt(0).page!.length);
+    setState(() {});
   }
 
   // submit() {
@@ -226,7 +235,6 @@ class _UserFormState extends State<UserForm> {
                             padding: const EdgeInsets.all(8.0),
                             child: Column(
                               children: [
-
                                 /// This shows maing UI
                                 buildPages(),
 
@@ -240,7 +248,7 @@ class _UserFormState extends State<UserForm> {
                                         onPressed: () {
                                           //submit();
                                         },
-                                        child: Text("Submit"))
+                                        child: const Text("Submit"))
                                     : Container()
                               ],
                             )),
@@ -254,32 +262,35 @@ class _UserFormState extends State<UserForm> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceAround,
                         children: [
-                          Obx(() =>  Visibility(
-                            maintainSize: true,
-                            maintainState: true,
-                            maintainAnimation: true,
-                            visible: pageController.currentPage.value > 0 ? true : false,
-                            child: ElevatedButton(
-                                onPressed: () {
-                                  pageController.setCurrentPage(
-                                      pageController.currentPage.value - 1
-                                  );
-                                },
-                                child: Text("Prev")),
-                          ),),
-                         Obx(() =>     Visibility(
-                           maintainSize: true,
-                           maintainAnimation: true,
-                           maintainState: true,
-                           visible: pageController.currentPage.value != pageController.totalPage.value - 1,
-                           child: ElevatedButton(
-                               onPressed: () {
-                                 pageController.setCurrentPage(
-                                     pageController.currentPage.value + 1
-                                 );
-                               },
-                               child: Text("Next")),
-                         ))
+                          Obx(
+                            () => Visibility(
+                              maintainSize: true,
+                              maintainState: true,
+                              maintainAnimation: true,
+                              visible: pageController.currentPage.value > 0
+                                  ? true
+                                  : false,
+                              child: ElevatedButton(
+                                  onPressed: () {
+                                    pageController.setCurrentPage(
+                                        pageController.currentPage.value - 1);
+                                  },
+                                  child: const Text("Prev")),
+                            ),
+                          ),
+                          Obx(() => Visibility(
+                                maintainSize: true,
+                                maintainAnimation: true,
+                                maintainState: true,
+                                visible: pageController.currentPage.value !=
+                                    pageController.totalPage.value - 1,
+                                child: ElevatedButton(
+                                    onPressed: () {
+                                      pageController.setCurrentPage(
+                                          pageController.currentPage.value + 1);
+                                    },
+                                    child: const Text("Next")),
+                              ))
                         ],
                       ))
                 ],
