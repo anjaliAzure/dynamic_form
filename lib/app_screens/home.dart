@@ -57,7 +57,7 @@ class _UserFormState extends State<UserForm> {
   }
 
   loadJson() async {
-    responseTxt = await rootBundle.loadString("assets/form.json");
+    responseTxt = await rootBundle.loadString("assets/form.txt");
     uiModel = UiModel.fromJson(jsonDecode(responseTxt!));
 
     UtilityWidgets().initFields(uiModel);
