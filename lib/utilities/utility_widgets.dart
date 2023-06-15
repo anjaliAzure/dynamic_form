@@ -49,13 +49,13 @@ class UtilityWidgets {
               CheckBoxModel checkBoxModel =
                   CheckBoxModel.fromJson(element.ob!.toJson());
 
-              Map<int, bool> x = {};
+              Map<int, bool> temp = {};
               for (int index = 0;
                   index < checkBoxModel.values!.length;
                   index++) {
-                x[checkBoxModel.values![index].id!] = false;
+                temp[checkBoxModel.values![index].id!] = false;
               }
-              checkboxController.initCheckboxValue(element.id!, x);
+              checkboxController.initCheckboxValue(element.id!, temp);
               checkboxController.setCheckBoxVisible(element.id!, false);
             }
             break;
@@ -76,7 +76,8 @@ class UtilityWidgets {
   }
 
   bool checkCondition(
-      {required bool isDependent,
+      {required int currentId,
+      required bool isDependent,
       required List<dynamic> value,
       required int page,
       required UiModel uiModel}) {
@@ -107,6 +108,9 @@ class UtilityWidgets {
               if (radioValueController
                       .radioValue[conditionModel.id]!.keys.first ==
                   conditionModel.subId) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  radioValueController.setRadioValue(currentId, {-1: "null"});
+                });
                 return false;
               }
             }
@@ -125,6 +129,15 @@ class UtilityWidgets {
                     checkboxController
                             .checkboxValue[conditionModel.id!]![index] ==
                         true) {
+                  // WidgetsBinding.instance.addPostFrameCallback((_) {
+                  //   Map<int, bool> temp = {};
+                  //   for (int index = 0;
+                  //       index < checkBoxModel.values!.length;
+                  //       index++) {
+                  //     temp[checkBoxModel.values![index].id!] = false;
+                  //   }
+                  //   checkboxController.initCheckboxValue(currentId, temp);
+                  // });
                   return false;
                 }
               }
@@ -136,6 +149,9 @@ class UtilityWidgets {
                 conditionModel.subId) {
               return true;
             } else {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                dropDownValueController.setDropdownValue(currentId, {-1: null});
+              });
               return false;
             }
         }
@@ -150,13 +166,13 @@ class UtilityWidgets {
       int page, int idx, String responseTxt, UiModel uiModel) {
     /// idx is the index of the list
     ShortTextModel shortTextModel = ShortTextModel.fromJson(
-        jsonDecode(responseTxt!)['fields']
+        jsonDecode(responseTxt)['fields']
             .elementAt(0)["page"]
             .elementAt(page)["lists"]
             .elementAt(idx)['ob']);
 
     /// id is the id of the field
-    int id = jsonDecode(responseTxt!)['fields']
+    int id = jsonDecode(responseTxt)['fields']
         .elementAt(0)["page"]
         .elementAt(page)["lists"]
         .elementAt(idx)['id'];
@@ -186,7 +202,6 @@ class UtilityWidgets {
         decoration: InputDecoration(label: Text(shortTextModel.label!)),
         onChanged: (value) {
           textController.setEditTextList(id, value);
-          textController.update();
         },
       ),
     );
@@ -217,6 +232,7 @@ class UtilityWidgets {
                 for (int i = 0; i < radioModel.values!.length; i++)
                   Visibility(
                     visible: checkCondition(
+                        currentId: id,
                         isDependent: radioModel.dependent ?? false,
                         value: radioModel.values!.elementAt(i).cond ?? [],
                         page: page,
@@ -261,19 +277,20 @@ class UtilityWidgets {
   Widget buildDropDown(int page, int idx, String responseTxt, UiModel uiModel) {
     /// idx is the index of the list
     DropDownModel dropDownModel = DropDownModel.fromJson(
-        jsonDecode(responseTxt!)['fields']
+        jsonDecode(responseTxt)['fields']
             .elementAt(0)["page"]
             .elementAt(page)["lists"]
             .elementAt(idx)['ob']);
 
     /// id is the id of the field
-    int id = jsonDecode(responseTxt!)['fields']
+    int id = jsonDecode(responseTxt)['fields']
         .elementAt(0)["page"]
         .elementAt(page)["lists"]
         .elementAt(idx)['id'];
 
     return Obx(() => Visibility(
           visible: checkCondition(
+              currentId: id,
               isDependent: dropDownModel.dependent ?? false,
               value: dropDownModel.cond ?? [],
               page: page,
@@ -327,13 +344,13 @@ class UtilityWidgets {
   Widget buildCheckBox(int page, int idx, String responseTxt, UiModel uiModel) {
     /// idx is the index of the list
     CheckBoxModel checkBoxModel = CheckBoxModel.fromJson(
-        jsonDecode(responseTxt!)['fields']
+        jsonDecode(responseTxt)['fields']
             .elementAt(0)["page"]
             .elementAt(page)["lists"]
             .elementAt(idx)['ob']);
 
     /// id is the id of the field
-    int id = jsonDecode(responseTxt!)['fields']
+    int id = jsonDecode(responseTxt)['fields']
         .elementAt(0)["page"]
         .elementAt(page)["lists"]
         .elementAt(idx)['id'];
@@ -348,6 +365,7 @@ class UtilityWidgets {
             for (int i = 0; i < checkBoxModel.values!.length; i++)
               Obx(() => Visibility(
                     visible: checkCondition(
+                        currentId: id,
                         isDependent: checkBoxModel.dependent ?? false,
                         value: checkBoxModel.values!.elementAt(i).cond ?? [],
                         page: page,
@@ -361,7 +379,6 @@ class UtilityWidgets {
                               .elementAt(i),
                           onChanged: (bool? value) {
                             checkboxController.setCheckBoxValue(id, i, value);
-                            checkboxController.refresh();
                           },
                         ),
                         Text(checkBoxModel.values!.elementAt(i).value!)
@@ -390,19 +407,20 @@ class UtilityWidgets {
 
     /// idx is the index of the list
     ImageModel imageModel = ImageModel.fromJson(
-        jsonDecode(responseTxt!)['fields']
+        jsonDecode(responseTxt)['fields']
             .elementAt(0)["page"]
             .elementAt(page)["lists"]
             .elementAt(idx)['ob']);
 
     /// id is the id of the field
-    int id = jsonDecode(responseTxt!)['fields']
+    int id = jsonDecode(responseTxt)['fields']
         .elementAt(0)["page"]
         .elementAt(page)["lists"]
         .elementAt(idx)['id'];
 
     return Obx(() => Visibility(
           visible: checkCondition(
+              currentId: id,
               isDependent: imageModel.dependent ?? false,
               value: imageModel.cond ?? [],
               page: page,
@@ -446,7 +464,6 @@ class UtilityWidgets {
                                       );
                                       imageController.setImageFileList(
                                           id, pickedFile!);
-                                      imageController.update();
                                     },
                                     style: ButtonStyle(
                                         shape: MaterialStateProperty.all<
@@ -473,7 +490,6 @@ class UtilityWidgets {
                                       );
                                       imageController.setImageFileList(
                                           id, pickedFile!);
-                                      imageController.update();
                                     },
                                     style: ButtonStyle(
                                         shape: MaterialStateProperty.all<
