@@ -564,6 +564,17 @@
                   "is_mandatory": true
                 }
               }
+            },
+            {
+             "type" : "location",
+             "id" : 18,
+             "ob" :
+             {
+               "label" : "Pick Location",
+               "dependent" : false,
+               "is_place" : true,
+               "is_current" : false
+             }
             }
           ]
         }

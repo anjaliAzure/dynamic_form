@@ -15,4 +15,5 @@ class Constants {
   static const checkBox = "checkBox";
   static const dropDown = "dropDown";
   static const image = "image";
+  static const location = "location";
 }

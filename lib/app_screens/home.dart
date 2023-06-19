@@ -73,6 +73,11 @@ class _UserFormState extends State<UserForm> {
                       i,
                       selectedFileController.selectedJson.value!,
                       uiModelController.uiModel.value!);
+                case Constants.location:
+                  return UtilityWidgets().buildLocation( pageController.currentPage.value,
+                      i,
+                      selectedFileController.selectedJson.value!,
+                      uiModelController.uiModel.value! , context);
                 default:
                   return Container();
               }

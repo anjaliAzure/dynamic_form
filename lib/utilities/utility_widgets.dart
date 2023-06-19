@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:test2/app_constants/constants.dart';
+import 'package:test2/app_screens/fetch_location.dart';
 import 'package:test2/get_controllers/checkbox_controller.dart';
 import 'package:test2/get_controllers/dropdown_controller.dart';
 import 'package:test2/get_controllers/image_controller.dart';
@@ -550,5 +551,13 @@ class UtilityWidgets {
             ],
           ),
         ));
+  }
+
+  /// Location
+  Widget buildLocation(int page , int idx, String responseTxt, UiModel uiModel , BuildContext context)
+  {
+    return ElevatedButton(onPressed: (){
+      Navigator.push(context, MaterialPageRoute(builder: (ctx) => FetchLocation()));
+      }, child: Text("Select Location"));
   }
 }
