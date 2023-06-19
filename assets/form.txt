@@ -44,15 +44,18 @@
                 "values": [
                   {
                     "id": 0,
-                    "value": "one"
+                    "value": "one",
+                    "cond": {}
                   },
                   {
                     "id": 1,
-                    "value": "two"
+                    "value": "two",
+                    "cond": {}
                   },
                   {
                     "id": 2,
-                    "value": "three"
+                    "value": "three",
+                    "cond": {}
                   }
                 ],
                 "validation": {
@@ -70,17 +73,15 @@
                   {
                     "id": 0,
                     "value": "five",
-                    "cond": []
+                    "cond": {}
                   },
                   {
                     "id": 1,
                     "value": "six",
-                    "cond": [
-                      {
+                    "cond": {
                         "id": 2,
                         "sub_id": 1
-                      }
-                    ]
+                    }
                   }
                 ],
                 "validation": {
@@ -97,21 +98,21 @@
                 "values": [
                   {
                     "id": 0,
-                    "value": "Yes"
+                    "value": "Yes",
+                    "cond": {}
                   },
                   {
                     "id": 1,
                     "value": "No",
-                    "cond": [
-                      {
+                    "cond": {
                         "id": 3,
                         "sub_id": 1
                       }
-                    ]
                   },
                   {
                     "id": 2,
-                    "value": "Maybe"
+                    "value": "Maybe",
+                    "cond": {}
                   }
                 ],
                 "validation": {
@@ -129,27 +130,24 @@
                 "values": [
                   {
                     "id": 0,
-                    "value": "Yes"
+                    "value": "Yes",
+                    "cond": {}
                   },
                   {
                     "id": 1,
                     "value": "No",
-                    "cond": [
-                      {
+                    "cond": {
                         "id": 4,
                         "sub_id": 1
                       }
-                    ]
                   },
                   {
                     "id": 2,
                     "value": "Maybe",
-                    "cond": [
-                      {
+                    "cond": {
                         "id": 4,
                         "sub_id": 1
                       }
-                    ]
                   }
                 ],
                 "validation": {
@@ -171,15 +169,18 @@
                 "values": [
                   {
                     "id": 0,
-                    "value": "Yes"
+                    "value": "Yes",
+                    "cond": {}
                   },
                   {
                     "id": 1,
-                    "value": "No"
+                    "value": "No",
+                    "cond": {}
                   },
                   {
                     "id": 2,
-                    "value": "Maybe"
+                    "value": "Maybe",
+                    "cond": {}
                   }
                 ],
                 "validation": {
@@ -201,11 +202,13 @@
                 "values": [
                   {
                     "id": 0,
-                    "value": "ten"
+                    "value": "ten",
+                    "cond": {}
                   },
                   {
                     "id": 1,
-                    "value": "eleven"
+                    "value": "eleven",
+                    "cond": {}
                   }
                 ],
                 "validation": {
@@ -219,12 +222,10 @@
               "ob": {
                 "label": "Choose Country",
                 "dependent": true,
-                "cond": [
-                  {
+                "cond": {
                     "id": 7,
                     "sub_id": 1
-                  }
-                ],
+                  },
                 "values": [
                   {
                     "id": 0,
@@ -262,12 +263,10 @@
               "ob": {
                 "label": "Choose City",
                 "dependent": true,
-                "cond": [
-                  {
+                "cond": {
                     "id": 8,
                     "sub_id": 0
-                  }
-                ],
+                  },
                 "values": [
                   {
                     "id": 0,
@@ -305,12 +304,10 @@
               "ob": {
                 "label": "Choose City",
                 "dependent": true,
-                "cond": [
-                  {
+                "cond": {
                     "id": 8,
                     "sub_id": 1
-                  }
-                ],
+                  },
                 "values": [
                   {
                     "id": 0,
@@ -348,12 +345,10 @@
               "ob": {
                 "label": "Choose City",
                 "dependent": true,
-                "cond": [
-                  {
+                "cond": {
                     "id": 8,
                     "sub_id": 2
-                  }
-                ],
+                  },
                 "values": [
                   {
                     "id": 0,
@@ -391,12 +386,10 @@
               "ob": {
                 "label": "Choose City",
                 "dependent": true,
-                "cond": [
-                  {
+                "cond": {
                     "id": 8,
                     "sub_id": 3
-                  }
-                ],
+                  },
                 "values": [
                   {
                     "id": 0,
@@ -434,12 +427,10 @@
               "ob": {
                 "label": "Choose City",
                 "dependent": true,
-                "cond": [
-                  {
+                "cond": {
                     "id": 8,
                     "sub_id": 4
-                  }
-                ],
+                  },
                 "values": [
                   {
                     "id": 0,
@@ -477,12 +468,10 @@
               "ob": {
                 "label": "Choose City",
                 "dependent": true,
-                "cond": [
-                  {
+                "cond": {
                     "id": 8,
                     "sub_id": 5
-                  }
-                ],
+                  },
                 "values": [
                   {
                     "id": 0,
@@ -522,15 +511,18 @@
                 "values": [
                   {
                     "id": 0,
-                    "value": "Twelve"
+                    "value": "Twelve",
+                    "cond": {}
                   },
                   {
                     "id": 1,
-                    "value": "Thirteen"
+                    "value": "Thirteen",
+                    "cond": {}
                   },
                   {
                     "id": 2,
-                    "value": "Fourteen"
+                    "value": "Fourteen",
+                    "cond": {}
                   }
                 ],
                 "validation": {
@@ -543,6 +535,7 @@
               "id": 16,
               "ob": {
                 "label": "Please add your profile pic",
+                "cond": {},
                 "validation": {
                   "is_mandatory": false
                 }
@@ -554,12 +547,10 @@
               "ob": {
                 "label": "Please add your Adhar pic",
                 "dependent": true,
-                "cond": [
-                  {
+                "cond": {
                     "id": 15,
                     "sub_id": 1
-                  }
-                ],
+                  },
                 "validation": {
                   "is_mandatory": true
                 }

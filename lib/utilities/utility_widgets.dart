@@ -75,25 +75,69 @@ class UtilityWidgets {
     });
   }
 
+  void currentValue(
+      {required int currentId,
+      required int prevId,
+      required String currentType,
+      dynamic checkBoxModel}) {
+    ///set the default value as per current widget type
+    switch (currentType) {
+      case Constants.radio:
+        {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            radioValueController.setRadioValue(currentId, {-1: "null"});
+          });
+          break;
+        }
+      case Constants.checkBox:
+        {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            for (int index = 0;
+                index < checkBoxModel!.values!.length;
+                index++) {
+              if (checkBoxModel.values![index].cond!.id != null) {
+                if (checkBoxModel.values![index].cond!.id == prevId) {
+                  checkboxController.setCheckBoxValue(currentId, index, false);
+                }
+              }
+            }
+          });
+          break;
+        }
+      case Constants.dropDown:
+        {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            dropDownValueController.setDropdownValue(currentId, {-1: null});
+          });
+          break;
+        }
+      default:
+        break;
+    }
+  }
+
   bool checkCondition(
       {required int currentId,
+      required String currentType,
       required bool isDependent,
-      required List<dynamic> value,
+      required dynamic conditionValue,
       required int page,
-      required UiModel uiModel}) {
+      required UiModel uiModel,
+      required dynamic currentModel}) {
     /// check is dependent
     if (isDependent) {
       /// this field does not dependent so return true
-      if (value.isEmpty) {
-        return true;
-      }
+      // if (conditionValue.) {
+      //   return true;
+      // }
 
       /// else
-      for (int i = 0; i < value.length; i++) {
-        ///traverse condition array
-        ConditionModel.Cond conditionModel = ConditionModel.Cond.fromJson(
-            jsonDecode(jsonEncode(value[i]).toString()));
+      //for (int i = 0; i < conditionValue.length; i++) {
+      ///traverse condition array
+      ConditionModel.Cond conditionModel = ConditionModel.Cond.fromJson(
+          jsonDecode(jsonEncode(conditionValue).toString()));
 
+      if (conditionModel.id != null && conditionModel.subId != null) {
         /// check what is the type of field on which current fields depends
         switch (uiModel.fields!
             .elementAt(0)
@@ -108,9 +152,12 @@ class UtilityWidgets {
               if (radioValueController
                       .radioValue[conditionModel.id]!.keys.first ==
                   conditionModel.subId) {
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  radioValueController.setRadioValue(currentId, {-1: "null"});
-                });
+                ///clear current widget value as per dependency
+                currentValue(
+                    currentId: currentId,
+                    prevId: conditionModel.id!,
+                    currentType: currentType,
+                    checkBoxModel: currentModel);
                 return false;
               }
             }
@@ -129,15 +176,12 @@ class UtilityWidgets {
                     checkboxController
                             .checkboxValue[conditionModel.id!]![index] ==
                         true) {
-                  // WidgetsBinding.instance.addPostFrameCallback((_) {
-                  //   Map<int, bool> temp = {};
-                  //   for (int index = 0;
-                  //       index < checkBoxModel.values!.length;
-                  //       index++) {
-                  //     temp[checkBoxModel.values![index].id!] = false;
-                  //   }
-                  //   checkboxController.initCheckboxValue(currentId, temp);
-                  // });
+                  ///clear current widget value as per dependency
+                  currentValue(
+                      currentId: currentId,
+                      prevId: conditionModel.id!,
+                      currentType: currentType,
+                      checkBoxModel: currentModel);
                   return false;
                 }
               }
@@ -149,13 +193,17 @@ class UtilityWidgets {
                 conditionModel.subId) {
               return true;
             } else {
-              WidgetsBinding.instance.addPostFrameCallback((_) {
-                dropDownValueController.setDropdownValue(currentId, {-1: null});
-              });
+              ///clear current widget value as per dependency
+              currentValue(
+                  currentId: currentId,
+                  prevId: conditionModel.id!,
+                  currentType: currentType,
+                  checkBoxModel: currentModel);
               return false;
             }
         }
       }
+      // }
       return true;
     }
     return true;
@@ -233,10 +281,13 @@ class UtilityWidgets {
                   Visibility(
                     visible: checkCondition(
                         currentId: id,
+                        currentType: Constants.radio,
                         isDependent: radioModel.dependent ?? false,
-                        value: radioModel.values!.elementAt(i).cond ?? [],
+                        conditionValue:
+                            radioModel.values!.elementAt(i).cond ?? [],
                         page: page,
-                        uiModel: uiModel),
+                        uiModel: uiModel,
+                        currentModel: radioModel),
                     child: Row(
                       children: [
                         Radio(
@@ -291,10 +342,12 @@ class UtilityWidgets {
     return Obx(() => Visibility(
           visible: checkCondition(
               currentId: id,
+              currentType: Constants.dropDown,
               isDependent: dropDownModel.dependent ?? false,
-              value: dropDownModel.cond ?? [],
+              conditionValue: dropDownModel.cond ?? [],
               page: page,
-              uiModel: uiModel),
+              uiModel: uiModel,
+              currentModel: dropDownModel),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
@@ -366,10 +419,13 @@ class UtilityWidgets {
               Obx(() => Visibility(
                     visible: checkCondition(
                         currentId: id,
+                        currentType: Constants.checkBox,
                         isDependent: checkBoxModel.dependent ?? false,
-                        value: checkBoxModel.values!.elementAt(i).cond ?? [],
+                        conditionValue:
+                            checkBoxModel.values!.elementAt(i).cond ?? [],
                         page: page,
-                        uiModel: uiModel),
+                        uiModel: uiModel,
+                        currentModel: checkBoxModel),
                     child: Row(
                       children: [
                         Checkbox(
@@ -421,10 +477,12 @@ class UtilityWidgets {
     return Obx(() => Visibility(
           visible: checkCondition(
               currentId: id,
+              currentType: Constants.image,
               isDependent: imageModel.dependent ?? false,
-              value: imageModel.cond ?? [],
+              conditionValue: imageModel.cond ?? [],
               page: page,
-              uiModel: uiModel),
+              uiModel: uiModel,
+              currentModel: imageModel),
           child: Column(
             mainAxisSize: MainAxisSize.max,
             crossAxisAlignment: CrossAxisAlignment.start,

@@ -16,8 +16,8 @@ class UiModel {
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
-    if (this.fields != null) {
-      data['fields'] = this.fields!.map((v) => v.toJson()).toList();
+    if (fields != null) {
+      data['fields'] = fields!.map((v) => v.toJson()).toList();
     }
     data['no_of_fields'] = noOfFields;
     return data;
@@ -40,8 +40,8 @@ class Fields {
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
-    if (this.page != null) {
-      data['page'] = this.page!.map((v) => v.toJson()).toList();
+    if (page != null) {
+      data['page'] = page!.map((v) => v.toJson()).toList();
     }
     return data;
   }
@@ -65,9 +65,9 @@ class Page {
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
-    data['page_no'] = this.pageNo;
-    if (this.lists != null) {
-      data['lists'] = this.lists!.map((v) => v.toJson()).toList();
+    data['page_no'] = pageNo;
+    if (lists != null) {
+      data['lists'] = lists!.map((v) => v.toJson()).toList();
     }
     return data;
   }
@@ -88,10 +88,10 @@ class Lists {
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
-    data['type'] = this.type;
-    data['id'] = this.id;
-    if (this.ob != null) {
-      data['ob'] = this.ob!.toJson();
+    data['type'] = type;
+    data['id'] = id;
+    if (ob != null) {
+      data['ob'] = ob!.toJson();
     }
     return data;
   }
@@ -102,8 +102,7 @@ class Ob {
   dynamic values;
   dynamic validation;
 
-
-  Ob({/*this.values,*/this.label});
+  Ob({/*this.values,*/ this.label});
 
   Ob.fromJson(Map<String, dynamic> json) {
     values = json['values'];
@@ -113,9 +112,9 @@ class Ob {
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
-    data['label'] = this.label;
-    data['values'] = this.values;
-    data['validation'] = this.validation;
+    data['label'] = label;
+    data['values'] = values;
+    data['validation'] = validation;
     return data;
   }
 }
