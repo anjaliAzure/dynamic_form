@@ -10,7 +10,6 @@ import 'package:test2/app_screens/fetch_location.dart';
 import 'package:test2/app_screens/home.dart';
 import 'package:test2/get_controllers/selected_file_controller.dart';
 import 'package:test2/get_controllers/ui_model_controller.dart';
-import 'package:test2/main.dart';
 import 'package:test2/utilities/common_widgets.dart';
 
 class PickFile extends StatefulWidget {
@@ -21,72 +20,70 @@ class PickFile extends StatefulWidget {
 }
 
 class _PickFileState extends State<PickFile> {
-
-  SelectedFileController selectedFileController = Get.find<SelectedFileController>();
+  SelectedFileController selectedFileController =
+      Get.find<SelectedFileController>();
   UIModelController uiModelController = Get.find<UIModelController>();
 
-  pickFile({isDefault = false})
-  async {
-    if(!isDefault)
-      {
-        try
-        {
-          FilePickerResult? filePickerResult = await FilePicker.platform.pickFiles(allowMultiple: false);
+  pickFile({isDefault = false}) async {
+    if (!isDefault) {
+      try {
+        FilePickerResult? filePickerResult =
+            await FilePicker.platform.pickFiles(allowMultiple: false);
 
-          if(filePickerResult != null)
-          {
-            File file = File(filePickerResult.paths.first!);
-            String f = file.readAsStringSync();
-            selectedFileController.setJson(f);
-            Map<String , dynamic> map = jsonDecode(selectedFileController.selectedJson.value);
-            uiModelController.setUiModel(map);
-            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => const UserForm()));
-          }
-          else
-          {
-            CommonWidgets.showToast("Please pick a file !");
-          }
-        }
-        catch(e)
-        {
-          CommonWidgets.showToast("Error ! ${e.toString()}");
-        }
-      }
-    else
-      {
-        try
-        {
-          String x = await rootBundle.loadString("assets/form.txt");
-          selectedFileController.setJson(x);
-          Map<String , dynamic> map = jsonDecode(selectedFileController.selectedJson.value);
+        if (filePickerResult != null) {
+          File file = File(filePickerResult.paths.first!);
+          String f = file.readAsStringSync();
+          selectedFileController.setJson(f);
+          Map<String, dynamic> map =
+              jsonDecode(selectedFileController.selectedJson.value);
           uiModelController.setUiModel(map);
-          Navigator.push(context, MaterialPageRoute(builder: (context) => const UserForm()));
+          Navigator.pushReplacement(context,
+              MaterialPageRoute(builder: (context) => const UserForm()));
+        } else {
+          CommonWidgets.showToast("Please pick a file !");
         }
-        catch(e)
-        {
-          log(e.toString());
-          CommonWidgets.showToast("Error !");
-        }
+      } catch (e) {
+        CommonWidgets.showToast("Error ! ${e.toString()}");
       }
+    } else {
+      try {
+        String x = await rootBundle.loadString("assets/form.txt");
+        selectedFileController.setJson(x);
+        Map<String, dynamic> map =
+            jsonDecode(selectedFileController.selectedJson.value);
+        uiModelController.setUiModel(map);
+        Navigator.push(
+            context, MaterialPageRoute(builder: (context) => const UserForm()));
+      } catch (e) {
+        log(e.toString());
+        CommonWidgets.showToast("Error !");
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Home"),),
+      appBar: AppBar(
+        title: Text("Home"),
+      ),
       body: SizedBox.expand(
         child: Column(
           mainAxisSize: MainAxisSize.max,
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            ElevatedButton(onPressed: (){
-              pickFile();
-             }, child: Text("Browse")),
+            ElevatedButton(
+                onPressed: () {
+                  pickFile();
+                },
+                child: Text("Browse")),
             Text("or"),
-            ElevatedButton(onPressed: (){
-              pickFile(isDefault:  true);
-             }, child: Text("Proceed with default")),
+            ElevatedButton(
+                onPressed: () {
+                  pickFile(isDefault: true);
+                },
+                child: Text("Proceed with default")),
           ],
         ),
       ),

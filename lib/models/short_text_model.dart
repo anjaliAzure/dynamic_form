@@ -7,12 +7,12 @@ class ShortTextModel {
   ShortTextModel.fromJson(Map<String, dynamic> json) {
     label = json['label'];
     validation = json['validation'] != null
-        ? new Validation.fromJson(json['validation'])
+        ? Validation.fromJson(json['validation'])
         : null;
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
+    final Map<String, dynamic> data = <String, dynamic>{};
     data['label'] = label;
     if (validation != null) {
       data['validation'] = validation!.toJson();
@@ -35,7 +35,7 @@ class Validation {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
+    final Map<String, dynamic> data = <String, dynamic>{};
     data['content_type'] = contentType;
     data['input_type'] = inputType;
     data['length'] = length;

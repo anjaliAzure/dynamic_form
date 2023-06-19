@@ -1,7 +1,7 @@
 class ImageModel {
   String? label;
   bool? dependent;
-  List<Cond>? cond;
+  Cond? cond;
   Validation? validation;
 
   ImageModel({this.label, this.dependent, this.cond, this.validation});
@@ -9,26 +9,21 @@ class ImageModel {
   ImageModel.fromJson(Map<String, dynamic> json) {
     label = json['label'];
     dependent = json['dependent'];
-    if (json['cond'] != null) {
-      cond = <Cond>[];
-      json['cond'].forEach((v) {
-        cond!.add(new Cond.fromJson(v));
-      });
-    }
+    cond = json['cond'] != null ? Cond.fromJson(json['cond']) : null;
     validation = json['validation'] != null
-        ? new Validation.fromJson(json['validation'])
+        ? Validation.fromJson(json['validation'])
         : null;
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['label'] = this.label;
-    data['dependent'] = this.dependent;
-    if (this.cond != null) {
-      data['cond'] = this.cond!.map((v) => v.toJson()).toList();
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['label'] = label;
+    data['dependent'] = dependent;
+    if (cond != null) {
+      data['cond'] = cond!.toJson();
     }
-    if (this.validation != null) {
-      data['validation'] = this.validation!.toJson();
+    if (validation != null) {
+      data['validation'] = validation!.toJson();
     }
     return data;
   }
@@ -46,9 +41,9 @@ class Cond {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['id'] = this.id;
-    data['sub_id'] = this.subId;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['id'] = id;
+    data['sub_id'] = subId;
     return data;
   }
 }
@@ -63,8 +58,8 @@ class Validation {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['is_mandatory'] = this.isMandatory;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['is_mandatory'] = isMandatory;
     return data;
   }
 }
