@@ -125,16 +125,10 @@ class UtilityWidgets {
       required int page,
       required UiModel uiModel,
       required dynamic currentModel}) {
+
     /// check is dependent
     if (isDependent) {
-      /// this field does not dependent so return true
-      // if (conditionValue.) {
-      //   return true;
-      // }
 
-      /// else
-      //for (int i = 0; i < conditionValue.length; i++) {
-      ///traverse condition array
       ConditionModel.Cond conditionModel = ConditionModel.Cond.fromJson(
           jsonDecode(jsonEncode(conditionValue).toString()));
 
@@ -229,6 +223,7 @@ class UtilityWidgets {
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: TextFormField(
+        initialValue: textController.editTextList[id],
         validator: (val) {
           if (shortTextModel.validation!.length!.first > -1) {
             if (val!.isEmpty) {

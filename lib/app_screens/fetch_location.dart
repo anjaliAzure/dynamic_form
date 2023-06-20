@@ -52,12 +52,11 @@ class _FetchLocationState extends State<FetchLocation> {
     return true;
   }
 
-  addMarker(LatLng latLng)
-  {
+  addMarker(LatLng latLng) {
     markers.clear();
     markers.add(
         Marker(markerId: MarkerId(latLng.toString()),
-        position: LatLng(latLng.latitude , latLng.longitude)
+            position: LatLng(latLng.latitude, latLng.longitude)
         ));
     setState(() {});
   }
