@@ -12,7 +12,7 @@ import 'package:test2/get_controllers/image_controller.dart';
 import 'package:test2/get_controllers/radio_controller.dart';
 import 'package:test2/get_controllers/text_controller.dart';
 import 'package:test2/models/checkbox_model.dart';
-import 'package:test2/models/condition_model.dart' as ConditionModel;
+import 'package:test2/models/condition_model.dart' as condition_model;
 import 'package:test2/models/dropdown_model.dart';
 import 'package:test2/models/image_model.dart';
 import 'package:test2/models/radio_model.dart';
@@ -29,8 +29,8 @@ class UtilityWidgets {
 
   initFields(UiModel uiModel) {
     /// initialise list of all Types
-    uiModel.fields!.elementAt(0).page!.forEach((element) {
-      element.lists!.forEach((element) {
+    for (var element in uiModel.fields!.elementAt(0).page!) {
+      for (var element in element.lists!) {
         switch (element.type) {
           case Constants.text:
             {
@@ -72,8 +72,8 @@ class UtilityWidgets {
             imageController.setImageVisible(element.id!, false);
             break;
         }
-      });
-    });
+      }
+    }
   }
 
   void currentValue(
@@ -129,7 +129,10 @@ class UtilityWidgets {
     /// check is dependent
     if (isDependent) {
 
-      ConditionModel.Cond conditionModel = ConditionModel.Cond.fromJson(
+      /// else
+      //for (int i = 0; i < conditionValue.length; i++) {
+      ///traverse condition array
+      condition_model.Cond conditionModel = condition_model.Cond.fromJson(
           jsonDecode(jsonEncode(conditionValue).toString()));
 
       if (conditionModel.id != null && conditionModel.subId != null) {
