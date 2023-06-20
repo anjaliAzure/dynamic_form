@@ -106,19 +106,145 @@ class _UserFormState extends State<UserForm> {
     }
   }
 
+  // submit() {
+  //   for (int i = 0;
+  //       i < uiModelController.uiModel.value!.fields!.elementAt(0).page!.length;
+  //       i++) {
+  //     for (int j = 0;
+  //         j <
+  //             uiModelController.uiModel.value!.fields!
+  //                 .elementAt(0)
+  //                 .page!
+  //                 .elementAt(i)
+  //                 .lists!
+  //                 .length;
+  //         j++) {
+  //       int id = uiModelController.uiModel.value!.fields!
+  //           .elementAt(0)
+  //           .page!
+  //           .elementAt(i)
+  //           .lists!
+  //           .elementAt(j)
+  //           .id!;
+  //       switch (uiModelController.uiModel.value!.fields!
+  //           .elementAt(0)
+  //           .page!
+  //           .elementAt(i)
+  //           .lists!
+  //           .elementAt(j)
+  //           .type) {
+  //         case Constants.text:
+  //           {
+  //             log("Text is ${textController.editTextList[i]}");
+  //           }
+  //           break;
+  //         case Constants.radio:
+  //           {
+  //             RadioModel radioModel = RadioModel.fromJson(jsonDecode(
+  //                     selectedFileController.selectedJson.value)['fields']
+  //                 .elementAt(0)["page"]
+  //                 .elementAt(i)["lists"]
+  //                 .elementAt(j)['ob']);
+  //             if (radioModel.validation!.isMandatory != null &&
+  //                 radioModel.validation!.isMandatory!) {
+  //               if (radioValueController.radioValue[id]!.values.elementAt(0) ==
+  //                   "null") {
+  //                 radioValueController.setRadioVisible(id, true);
+  //               } else {
+  //                 radioValueController.setRadioVisible(id, false);
+  //               }
+  //             }
+  //           }
+  //           break;
+  //         case Constants.checkBox:
+  //           {
+  //             //log("checkbox ${checkboxController.checkboxValue[id].toString()}");
+  //             int selectedCount = 0;
+  //             CheckBoxModel checkboxModel = CheckBoxModel.fromJson(jsonDecode(
+  //                     selectedFileController.selectedJson.value)['fields']
+  //                 .elementAt(0)["page"]
+  //                 .elementAt(i)["lists"]
+  //                 .elementAt(j)['ob']);
+  //             for (int index = 0;
+  //                 index < checkboxController.checkboxValue[id]!.length;
+  //                 index++) {
+  //               if (checkboxController.checkboxValue[id]![index] == true) {
+  //                 selectedCount++;
+  //               }
+  //             }
+  //             if (checkboxModel.validation!.minCheck! <= selectedCount &&
+  //                 selectedCount <= checkboxModel.validation!.maxCheck!) {
+  //               checkboxController.setCheckBoxVisible(id, false);
+  //             } else {
+  //               checkboxController.setCheckBoxVisible(id, true);
+  //             }
+  //           }
+  //           break;
+  //         case Constants.dropDown:
+  //           {
+  //             DropDownModel dropDownModel = DropDownModel.fromJson(jsonDecode(
+  //                     selectedFileController.selectedJson.value)['fields']
+  //                 .elementAt(0)["page"]
+  //                 .elementAt(i)["lists"]
+  //                 .elementAt(j)['ob']);
+  //             if (dropDownModel.validation!.isMandatory != null &&
+  //                 dropDownModel.validation!.isMandatory!) {
+  //               if (dropDownValueController.dropDownValue[id]!.values
+  //                       .elementAt(0) ==
+  //                   null) {
+  //                 dropDownValueController.setDropDownVisible(id, true);
+  //               } else {
+  //                 dropDownValueController.setDropDownVisible(id, false);
+  //               }
+  //             }
+  //           }
+  //           break;
+  //         case Constants.image:
+  //           {
+  //             ImageModel imageModel = ImageModel.fromJson(jsonDecode(
+  //                     selectedFileController.selectedJson.value)['fields']
+  //                 .elementAt(0)["page"]
+  //                 .elementAt(i)["lists"]
+  //                 .elementAt(j)['ob']);
+  //             if (imageModel.validation!.isMandatory != null &&
+  //                 imageModel.validation!.isMandatory!) {
+  //               if (imageController.imageFileList[id]!.path == "") {
+  //                 imageController.setImageVisible(id, true);
+  //               } else {
+  //                 imageController.setImageVisible(id, false);
+  //               }
+  //             }
+  //           }
+  //           break;
+  //         default:
+  //           log("");
+  //       }
+  //     }
+  //   }
+  //
+  //
+  //
+  //   if (_formKey.currentState!.validate()) {
+  //     if (!radioValueController.radioVisible.values.contains(true) &&
+  //         !checkboxController.checkBoxVisible.values.contains(true) &&
+  //         !dropDownValueController.dropDownVisible.values.contains(true)) {
+  //       CommonWidgets.showToast("All Done!!!!!!!");
+  //     }
+  //   }
+  // }
+
   submit() {
-    for (int i = 0;
-        i < uiModelController.uiModel.value!.fields!.elementAt(0).page!.length;
-        i++) {
-      for (int j = 0;
-          j <
-              uiModelController.uiModel.value!.fields!
-                  .elementAt(0)
-                  .page!
-                  .elementAt(i)
-                  .lists!
-                  .length;
-          j++) {
+
+    int i = pageController.currentPage.value;
+    for (int j = 0;
+      j <
+          uiModelController.uiModel.value!.fields!
+              .elementAt(0)
+              .page!
+              .elementAt(i)
+              .lists!
+              .length;
+      j++) {
         int id = uiModelController.uiModel.value!.fields!
             .elementAt(0)
             .page!
@@ -126,7 +252,6 @@ class _UserFormState extends State<UserForm> {
             .lists!
             .elementAt(j)
             .id!;
-        //log("id is $id");
         switch (uiModelController.uiModel.value!.fields!
             .elementAt(0)
             .page!
@@ -142,7 +267,7 @@ class _UserFormState extends State<UserForm> {
           case Constants.radio:
             {
               RadioModel radioModel = RadioModel.fromJson(jsonDecode(
-                      selectedFileController.selectedJson.value)['fields']
+                  selectedFileController.selectedJson.value)['fields']
                   .elementAt(0)["page"]
                   .elementAt(i)["lists"]
                   .elementAt(j)['ob']);
@@ -159,16 +284,15 @@ class _UserFormState extends State<UserForm> {
             break;
           case Constants.checkBox:
             {
-              //log("checkbox ${checkboxController.checkboxValue[id].toString()}");
               int selectedCount = 0;
               CheckBoxModel checkboxModel = CheckBoxModel.fromJson(jsonDecode(
-                      selectedFileController.selectedJson.value)['fields']
+                  selectedFileController.selectedJson.value)['fields']
                   .elementAt(0)["page"]
                   .elementAt(i)["lists"]
                   .elementAt(j)['ob']);
               for (int index = 0;
-                  index < checkboxController.checkboxValue[id]!.length;
-                  index++) {
+              index < checkboxController.checkboxValue[id]!.length;
+              index++) {
                 if (checkboxController.checkboxValue[id]![index] == true) {
                   selectedCount++;
                 }
@@ -184,14 +308,14 @@ class _UserFormState extends State<UserForm> {
           case Constants.dropDown:
             {
               DropDownModel dropDownModel = DropDownModel.fromJson(jsonDecode(
-                      selectedFileController.selectedJson.value)['fields']
+                  selectedFileController.selectedJson.value)['fields']
                   .elementAt(0)["page"]
                   .elementAt(i)["lists"]
                   .elementAt(j)['ob']);
               if (dropDownModel.validation!.isMandatory != null &&
                   dropDownModel.validation!.isMandatory!) {
                 if (dropDownValueController.dropDownValue[id]!.values
-                        .elementAt(0) ==
+                    .elementAt(0) ==
                     null) {
                   dropDownValueController.setDropDownVisible(id, true);
                 } else {
@@ -203,7 +327,7 @@ class _UserFormState extends State<UserForm> {
           case Constants.image:
             {
               ImageModel imageModel = ImageModel.fromJson(jsonDecode(
-                      selectedFileController.selectedJson.value)['fields']
+                  selectedFileController.selectedJson.value)['fields']
                   .elementAt(0)["page"]
                   .elementAt(i)["lists"]
                   .elementAt(j)['ob']);
@@ -221,9 +345,10 @@ class _UserFormState extends State<UserForm> {
             log("");
         }
       }
-    }
 
-    for (int i = 0; i < uiModelController.uiModel.value!.fields!.length; i++) {}
+
+
+
     if (_formKey.currentState!.validate()) {
       if (!radioValueController.radioVisible.values.contains(true) &&
           !checkboxController.checkBoxVisible.values.contains(true) &&
@@ -232,7 +357,6 @@ class _UserFormState extends State<UserForm> {
       }
     }
   }
-
   @override
   void initState() {
     // TODO: implement initState
@@ -303,8 +427,9 @@ class _UserFormState extends State<UserForm> {
                           pageController.totalPage.value - 1,
                       child: ElevatedButton(
                           onPressed: () {
-                            pageController.setCurrentPage(
-                                pageController.currentPage.value + 1);
+                            submit();
+                            // pageController.setCurrentPage(
+                            //     pageController.currentPage.value + 1);
                           },
                           child: const Text("Next")),
                     ))
