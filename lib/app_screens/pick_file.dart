@@ -36,6 +36,7 @@ class _PickFileState extends State<PickFile> {
           Map<String, dynamic> map =
               jsonDecode(selectedFileController.selectedJson.value);
           uiModelController.setUiModel(map);
+          if (!mounted) return;
           Navigator.pushReplacement(context,
               MaterialPageRoute(builder: (context) => const UserForm()));
         } else {
@@ -51,6 +52,7 @@ class _PickFileState extends State<PickFile> {
         Map<String, dynamic> map =
             jsonDecode(selectedFileController.selectedJson.value);
         uiModelController.setUiModel(map);
+        if (!mounted) return;
         Navigator.push(
             context, MaterialPageRoute(builder: (context) => const UserForm()));
       } catch (e) {
@@ -64,7 +66,7 @@ class _PickFileState extends State<PickFile> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Home"),
+        title: const Text("Home"),
       ),
       body: SizedBox.expand(
         child: Column(
@@ -76,13 +78,13 @@ class _PickFileState extends State<PickFile> {
                 onPressed: () {
                   pickFile();
                 },
-                child: Text("Browse")),
-            Text("or"),
+                child: const Text("Browse")),
+            const Text("or"),
             ElevatedButton(
                 onPressed: () {
                   pickFile(isDefault: true);
                 },
-                child: Text("Proceed with default")),
+                child: const Text("Proceed with default")),
           ],
         ),
       ),
