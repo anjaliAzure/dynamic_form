@@ -8,8 +8,8 @@ import 'package:test2/get_controllers/page_controller.dart';
 import 'package:test2/get_controllers/selected_file_controller.dart';
 import 'package:test2/get_controllers/ui_model_controller.dart';
 import 'package:test2/utilities/common_widgets.dart';
+import 'package:test2/utilities/hive_crud.dart';
 import 'package:test2/utilities/utility_widgets.dart';
-
 import '../get_controllers/checkbox_controller.dart';
 import '../get_controllers/dropdown_controller.dart';
 import '../get_controllers/image_controller.dart';
@@ -106,135 +106,9 @@ class _UserFormState extends State<UserForm> {
     }
   }
 
-  // submit() {
-  //   for (int i = 0;
-  //       i < uiModelController.uiModel.value!.fields!.elementAt(0).page!.length;
-  //       i++) {
-  //     for (int j = 0;
-  //         j <
-  //             uiModelController.uiModel.value!.fields!
-  //                 .elementAt(0)
-  //                 .page!
-  //                 .elementAt(i)
-  //                 .lists!
-  //                 .length;
-  //         j++) {
-  //       int id = uiModelController.uiModel.value!.fields!
-  //           .elementAt(0)
-  //           .page!
-  //           .elementAt(i)
-  //           .lists!
-  //           .elementAt(j)
-  //           .id!;
-  //       switch (uiModelController.uiModel.value!.fields!
-  //           .elementAt(0)
-  //           .page!
-  //           .elementAt(i)
-  //           .lists!
-  //           .elementAt(j)
-  //           .type) {
-  //         case Constants.text:
-  //           {
-  //             log("Text is ${textController.editTextList[i]}");
-  //           }
-  //           break;
-  //         case Constants.radio:
-  //           {
-  //             RadioModel radioModel = RadioModel.fromJson(jsonDecode(
-  //                     selectedFileController.selectedJson.value)['fields']
-  //                 .elementAt(0)["page"]
-  //                 .elementAt(i)["lists"]
-  //                 .elementAt(j)['ob']);
-  //             if (radioModel.validation!.isMandatory != null &&
-  //                 radioModel.validation!.isMandatory!) {
-  //               if (radioValueController.radioValue[id]!.values.elementAt(0) ==
-  //                   "null") {
-  //                 radioValueController.setRadioVisible(id, true);
-  //               } else {
-  //                 radioValueController.setRadioVisible(id, false);
-  //               }
-  //             }
-  //           }
-  //           break;
-  //         case Constants.checkBox:
-  //           {
-  //             //log("checkbox ${checkboxController.checkboxValue[id].toString()}");
-  //             int selectedCount = 0;
-  //             CheckBoxModel checkboxModel = CheckBoxModel.fromJson(jsonDecode(
-  //                     selectedFileController.selectedJson.value)['fields']
-  //                 .elementAt(0)["page"]
-  //                 .elementAt(i)["lists"]
-  //                 .elementAt(j)['ob']);
-  //             for (int index = 0;
-  //                 index < checkboxController.checkboxValue[id]!.length;
-  //                 index++) {
-  //               if (checkboxController.checkboxValue[id]![index] == true) {
-  //                 selectedCount++;
-  //               }
-  //             }
-  //             if (checkboxModel.validation!.minCheck! <= selectedCount &&
-  //                 selectedCount <= checkboxModel.validation!.maxCheck!) {
-  //               checkboxController.setCheckBoxVisible(id, false);
-  //             } else {
-  //               checkboxController.setCheckBoxVisible(id, true);
-  //             }
-  //           }
-  //           break;
-  //         case Constants.dropDown:
-  //           {
-  //             DropDownModel dropDownModel = DropDownModel.fromJson(jsonDecode(
-  //                     selectedFileController.selectedJson.value)['fields']
-  //                 .elementAt(0)["page"]
-  //                 .elementAt(i)["lists"]
-  //                 .elementAt(j)['ob']);
-  //             if (dropDownModel.validation!.isMandatory != null &&
-  //                 dropDownModel.validation!.isMandatory!) {
-  //               if (dropDownValueController.dropDownValue[id]!.values
-  //                       .elementAt(0) ==
-  //                   null) {
-  //                 dropDownValueController.setDropDownVisible(id, true);
-  //               } else {
-  //                 dropDownValueController.setDropDownVisible(id, false);
-  //               }
-  //             }
-  //           }
-  //           break;
-  //         case Constants.image:
-  //           {
-  //             ImageModel imageModel = ImageModel.fromJson(jsonDecode(
-  //                     selectedFileController.selectedJson.value)['fields']
-  //                 .elementAt(0)["page"]
-  //                 .elementAt(i)["lists"]
-  //                 .elementAt(j)['ob']);
-  //             if (imageModel.validation!.isMandatory != null &&
-  //                 imageModel.validation!.isMandatory!) {
-  //               if (imageController.imageFileList[id]!.path == "") {
-  //                 imageController.setImageVisible(id, true);
-  //               } else {
-  //                 imageController.setImageVisible(id, false);
-  //               }
-  //             }
-  //           }
-  //           break;
-  //         default:
-  //           log("");
-  //       }
-  //     }
-  //   }
-  //
-  //
-  //
-  //   if (_formKey.currentState!.validate()) {
-  //     if (!radioValueController.radioVisible.values.contains(true) &&
-  //         !checkboxController.checkBoxVisible.values.contains(true) &&
-  //         !dropDownValueController.dropDownVisible.values.contains(true)) {
-  //       CommonWidgets.showToast("All Done!!!!!!!");
-  //     }
-  //   }
-  // }
+  verifyAndSubmit({isSubmit = false}) {
 
-  submit() {
-
+    bool isValidated = true;
     int i = pageController.currentPage.value;
     for (int j = 0;
       j <
@@ -275,6 +149,7 @@ class _UserFormState extends State<UserForm> {
                   radioModel.validation!.isMandatory!) {
                 if (radioValueController.radioValue[id]!.values.elementAt(0) ==
                     "null") {
+                  isValidated = false;
                   radioValueController.setRadioVisible(id, true);
                 } else {
                   radioValueController.setRadioVisible(id, false);
@@ -301,6 +176,7 @@ class _UserFormState extends State<UserForm> {
                   selectedCount <= checkboxModel.validation!.maxCheck!) {
                 checkboxController.setCheckBoxVisible(id, false);
               } else {
+                isValidated = false;
                 checkboxController.setCheckBoxVisible(id, true);
               }
             }
@@ -317,6 +193,7 @@ class _UserFormState extends State<UserForm> {
                 if (dropDownValueController.dropDownValue[id]!.values
                     .elementAt(0) ==
                     null) {
+                  isValidated = false;
                   dropDownValueController.setDropDownVisible(id, true);
                 } else {
                   dropDownValueController.setDropDownVisible(id, false);
@@ -334,6 +211,7 @@ class _UserFormState extends State<UserForm> {
               if (imageModel.validation!.isMandatory != null &&
                   imageModel.validation!.isMandatory!) {
                 if (imageController.imageFileList[id]!.path == "") {
+                  isValidated = false;
                   imageController.setImageVisible(id, true);
                 } else {
                   imageController.setImageVisible(id, false);
@@ -347,20 +225,25 @@ class _UserFormState extends State<UserForm> {
       }
 
 
-
-
-    if (_formKey.currentState!.validate()) {
-      if (!radioValueController.radioVisible.values.contains(true) &&
-          !checkboxController.checkBoxVisible.values.contains(true) &&
-          !dropDownValueController.dropDownVisible.values.contains(true)) {
-        CommonWidgets.showToast("All Done!!!!!!!");
+    if (_formKey.currentState!.validate() && isValidated) {
+      CommonWidgets.showToast("ok");
+      if(!isSubmit)
+        {
+          pageController.setCurrentPage(
+              pageController.currentPage.value + 1);
+        }
+      else
+      {
+         /// Call the APi
       }
     }
   }
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    HiveHelper().initHive();
     loadJson();
   }
 
@@ -388,7 +271,7 @@ class _UserFormState extends State<UserForm> {
                                   1
                           ? ElevatedButton(
                               onPressed: () {
-                                submit();
+                                 verifyAndSubmit(isSubmit: true);
                               },
                               child: const Text("Submit"))
                           : Container())
@@ -427,9 +310,7 @@ class _UserFormState extends State<UserForm> {
                           pageController.totalPage.value - 1,
                       child: ElevatedButton(
                           onPressed: () {
-                            submit();
-                            // pageController.setCurrentPage(
-                            //     pageController.currentPage.value + 1);
+                            verifyAndSubmit();
                           },
                           child: const Text("Next")),
                     ))

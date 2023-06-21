@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
@@ -407,7 +406,7 @@ class UtilityWidgets {
         .elementAt(page)["lists"]
         .elementAt(idx)['id'];
 
-    return Column(
+    return Obx(() => Column(
       mainAxisAlignment: MainAxisAlignment.start,
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -415,31 +414,31 @@ class UtilityWidgets {
         Row(
           children: [
             for (int i = 0; i < checkBoxModel.values!.length; i++)
-              Obx(() => Visibility(
-                    visible: checkCondition(
-                        currentId: id,
-                        currentType: Constants.checkBox,
-                        isDependent: checkBoxModel.dependent ?? false,
-                        conditionValue:
-                            checkBoxModel.values!.elementAt(i).cond ?? [],
-                        page: page,
-                        uiModel: uiModel,
-                        currentModel: checkBoxModel),
-                    child: Row(
-                      children: [
-                        Checkbox(
-                          checkColor: Colors.white,
-                          activeColor: Colors.blue,
-                          value: checkboxController.checkboxValue[id]!.values
-                              .elementAt(i),
-                          onChanged: (bool? value) {
-                            checkboxController.setCheckBoxValue(id, i, value);
-                          },
-                        ),
-                        Text(checkBoxModel.values!.elementAt(i).value!)
-                      ],
+              Visibility(
+                visible: checkCondition(
+                    currentId: id,
+                    currentType: Constants.checkBox,
+                    isDependent: checkBoxModel.dependent ?? false,
+                    conditionValue:
+                    checkBoxModel.values!.elementAt(i).cond ?? [],
+                    page: page,
+                    uiModel: uiModel,
+                    currentModel: checkBoxModel),
+                child: Row(
+                  children: [
+                    Checkbox(
+                      checkColor: Colors.white,
+                      activeColor: Colors.blue,
+                      value: checkboxController.checkboxValue[id]!.values
+                          .elementAt(i),
+                      onChanged: (bool? value) {
+                        checkboxController.setCheckBoxValue(id, i, value);
+                      },
                     ),
-                  ))
+                    Text(checkBoxModel.values!.elementAt(i).value!)
+                  ],
+                ),
+              )
           ],
         ),
         Visibility(
@@ -453,7 +452,7 @@ class UtilityWidgets {
           ),
         )
       ],
-    );
+    ));
   }
 
   /// Image
@@ -626,10 +625,10 @@ class UtilityWidgets {
   }
 
   /// Location
-  Widget buildLocation(int page , int idx, String responseTxt, UiModel uiModel , BuildContext context)
-  {
-    return ElevatedButton(onPressed: (){
-      Navigator.push(context, MaterialPageRoute(builder: (ctx) => FetchLocation()));
-      }, child: Text("Select Location"));
+  Widget buildLocation(int page , int idx, String responseTxt, UiModel uiModel , BuildContext context) {
+    return ElevatedButton(onPressed: () {
+      Navigator.push(
+          context, MaterialPageRoute(builder: (ctx) => FetchLocation()));
+    }, child: Text("Select Location"));
   }
 }

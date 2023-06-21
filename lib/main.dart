@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
-import 'package:test2/app_screens/home.dart';
 import 'package:test2/app_screens/pick_file.dart';
 import 'utilities/get_binding.dart';
 
