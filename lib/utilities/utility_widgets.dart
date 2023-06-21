@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
@@ -17,6 +18,7 @@ import 'package:test2/models/image_model.dart';
 import 'package:test2/models/radio_model.dart';
 import 'package:test2/models/short_text_model.dart';
 import 'package:test2/models/ui_model.dart';
+import 'package:test2/utilities/common_widgets.dart';
 
 class UtilityWidgets {
   late RadioController radioValueController = Get.find<RadioController>();
@@ -79,24 +81,30 @@ class UtilityWidgets {
       {required int currentId,
       required int prevId,
       required String currentType,
-      dynamic checkBoxModel}) {
+      dynamic currentModel}) {
     ///set the default value as per current widget type
     switch (currentType) {
       case Constants.radio:
         {
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            radioValueController.setRadioValue(currentId, {-1: "null"});
+            for (int index = 0; index < currentModel!.values!.length; index++) {
+              if (currentModel.values![index].cond!.id != null) {
+                if (currentModel.values![index].cond!.id == prevId &&
+                    radioValueController.radioValue[currentId]!.keys.first ==
+                        currentModel.values![index].id) {
+                  radioValueController.setRadioValue(currentId, {-1: "null"});
+                }
+              }
+            }
           });
           break;
         }
       case Constants.checkBox:
         {
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            for (int index = 0;
-                index < checkBoxModel!.values!.length;
-                index++) {
-              if (checkBoxModel.values![index].cond!.id != null) {
-                if (checkBoxModel.values![index].cond!.id == prevId) {
+            for (int index = 0; index < currentModel!.values!.length; index++) {
+              if (currentModel.values![index].cond!.id != null) {
+                if (currentModel.values![index].cond!.id == prevId) {
                   checkboxController.setCheckBoxValue(currentId, index, false);
                 }
               }
@@ -124,10 +132,8 @@ class UtilityWidgets {
       required int page,
       required UiModel uiModel,
       required dynamic currentModel}) {
-
     /// check is dependent
     if (isDependent) {
-
       /// else
       //for (int i = 0; i < conditionValue.length; i++) {
       ///traverse condition array
@@ -154,7 +160,7 @@ class UtilityWidgets {
                     currentId: currentId,
                     prevId: conditionModel.id!,
                     currentType: currentType,
-                    checkBoxModel: currentModel);
+                    currentModel: currentModel);
                 return false;
               }
             }
@@ -178,7 +184,7 @@ class UtilityWidgets {
                       currentId: currentId,
                       prevId: conditionModel.id!,
                       currentType: currentType,
-                      checkBoxModel: currentModel);
+                      currentModel: currentModel);
                   return false;
                 }
               }
@@ -195,7 +201,7 @@ class UtilityWidgets {
                   currentId: currentId,
                   prevId: conditionModel.id!,
                   currentType: currentType,
-                  checkBoxModel: currentModel);
+                  currentModel: currentModel);
               return false;
             }
         }
@@ -625,10 +631,21 @@ class UtilityWidgets {
   }
 
   /// Location
-  Widget buildLocation(int page , int idx, String responseTxt, UiModel uiModel , BuildContext context) {
-    return ElevatedButton(onPressed: () {
-      Navigator.push(
-          context, MaterialPageRoute(builder: (ctx) => FetchLocation()));
-    }, child: Text("Select Location"));
+  Widget buildLocation(int page, int idx, String responseTxt, UiModel uiModel,
+      BuildContext context) {
+    return ElevatedButton(
+        onPressed: () {
+          Navigator.push(
+                  context, MaterialPageRoute(builder: (ctx) => FetchLocation()))
+              .then((value) {
+            if (value != null && value.isNotEmpty) {
+              CommonWidgets.showToast(
+                  "Current Location \n ${value[2].toStringAsFixed(3)}, ${value[3].toStringAsFixed(3)}");
+              CommonWidgets.showToast(
+                  "Marked Location \n ${value[0].toStringAsFixed(3)}, ${value[1].toStringAsFixed(3)}");
+            }
+          });
+        },
+        child: Text("Select Location"));
   }
 }

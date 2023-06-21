@@ -6,7 +6,6 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import 'package:test2/app_screens/fetch_location.dart';
 import 'package:test2/app_screens/home.dart';
 import 'package:test2/get_controllers/selected_file_controller.dart';
 import 'package:test2/get_controllers/ui_model_controller.dart';
@@ -54,7 +53,7 @@ class _PickFileState extends State<PickFile> {
             jsonDecode(selectedFileController.selectedJson.value);
         uiModelController.setUiModel(map);
         if (!mounted) return;
-        Navigator.push(
+        Navigator.pushReplacement(
             context, MaterialPageRoute(builder: (context) => const UserForm()));
       } catch (e) {
         log(e.toString());

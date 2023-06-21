@@ -1,6 +1,3 @@
-import 'dart:convert';
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:test2/app_constants/constants.dart';
@@ -10,15 +7,12 @@ import 'package:test2/get_controllers/ui_model_controller.dart';
 import 'package:test2/utilities/common_widgets.dart';
 import 'package:test2/utilities/hive_crud.dart';
 import 'package:test2/utilities/utility_widgets.dart';
+
 import '../get_controllers/checkbox_controller.dart';
 import '../get_controllers/dropdown_controller.dart';
 import '../get_controllers/image_controller.dart';
 import '../get_controllers/radio_controller.dart';
 import '../get_controllers/text_controller.dart';
-import '../models/checkbox_model.dart';
-import '../models/dropdown_model.dart';
-import '../models/image_model.dart';
-import '../models/radio_model.dart';
 
 class UserForm extends StatefulWidget {
   const UserForm({Key? key}) : super(key: key);
@@ -41,59 +35,61 @@ class _UserFormState extends State<UserForm> {
   late TextController textController = Get.find<TextController>();
 
   Widget buildPages() {
-    return  Obx(() => ListView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: uiModelController.uiModel.value?.fields!.first.page!
-                .elementAt(pageController.currentPage.value)
-                .lists!
-                .length,
-            itemBuilder: (context, i) {
-              /// i represents index of the list
-              switch (uiModelController.uiModel.value?.fields!.first.page!
-                  .elementAt(pageController.currentPage.value)
-                  .lists!
-                  .elementAt(i)
-                  .type) {
-                case Constants.text:
-                  return UtilityWidgets().buildShortText(
-                      pageController.currentPage.value,
-                      i,
-                      selectedFileController.selectedJson.value!,
-                      uiModelController.uiModel.value!);
-                case Constants.radio:
-                  return UtilityWidgets().buildRadio(
-                      pageController.currentPage.value,
-                      i,
-                      selectedFileController.selectedJson.value!,
-                      uiModelController.uiModel.value!);
-                case Constants.checkBox:
-                  return UtilityWidgets().buildCheckBox(
-                      pageController.currentPage.value,
-                      i,
-                      selectedFileController.selectedJson.value!,
-                      uiModelController.uiModel.value!);
-                case Constants.dropDown:
-                  return UtilityWidgets().buildDropDown(
-                      pageController.currentPage.value,
-                      i,
-                      selectedFileController.selectedJson.value!,
-                      uiModelController.uiModel.value!);
-                case Constants.image:
-                  return UtilityWidgets().buildImage(
-                      pageController.currentPage.value,
-                      i,
-                      selectedFileController.selectedJson.value!,
-                      uiModelController.uiModel.value!);
-                case Constants.location:
-                  return UtilityWidgets().buildLocation( pageController.currentPage.value,
-                      i,
-                      selectedFileController.selectedJson.value!,
-                      uiModelController.uiModel.value! , context);
-                default:
-                  return Container();
-              }
-            }));
+    return Obx(() => ListView.builder(
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: uiModelController.uiModel.value?.fields!.first.page!
+            .elementAt(pageController.currentPage.value)
+            .lists!
+            .length,
+        itemBuilder: (context, i) {
+          /// i represents index of the list
+          switch (uiModelController.uiModel.value?.fields!.first.page!
+              .elementAt(pageController.currentPage.value)
+              .lists!
+              .elementAt(i)
+              .type) {
+            case Constants.text:
+              return UtilityWidgets().buildShortText(
+                  pageController.currentPage.value,
+                  i,
+                  selectedFileController.selectedJson.value,
+                  uiModelController.uiModel.value!);
+            case Constants.radio:
+              return UtilityWidgets().buildRadio(
+                  pageController.currentPage.value,
+                  i,
+                  selectedFileController.selectedJson.value,
+                  uiModelController.uiModel.value!);
+            case Constants.checkBox:
+              return UtilityWidgets().buildCheckBox(
+                  pageController.currentPage.value,
+                  i,
+                  selectedFileController.selectedJson.value,
+                  uiModelController.uiModel.value!);
+            case Constants.dropDown:
+              return UtilityWidgets().buildDropDown(
+                  pageController.currentPage.value,
+                  i,
+                  selectedFileController.selectedJson.value,
+                  uiModelController.uiModel.value!);
+            case Constants.image:
+              return UtilityWidgets().buildImage(
+                  pageController.currentPage.value,
+                  i,
+                  selectedFileController.selectedJson.value,
+                  uiModelController.uiModel.value!);
+            case Constants.location:
+              return UtilityWidgets().buildLocation(
+                  pageController.currentPage.value,
+                  i,
+                  selectedFileController.selectedJson.value,
+                  uiModelController.uiModel.value!,
+                  context);
+            default:
+              return Container();
+          }
+        }));
   }
 
   loadJson() async {
