@@ -14,14 +14,8 @@ class HiveHelper
     {
       Directory directory = await getApplicationDocumentsDirectory();
       Hive.init(directory.path);
-      Box box = await Hive.openBox("test_1");
-      for(int i = 0 ; i < 10 ; i++)
-        {
-          box.add({
-            "name" : "Dhaval",
-            "age" : 23
-          });
-        }
+
+      clear();
     }
     catch(e)
      {

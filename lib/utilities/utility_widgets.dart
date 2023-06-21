@@ -9,8 +9,10 @@ import 'package:test2/app_screens/fetch_location.dart';
 import 'package:test2/get_controllers/checkbox_controller.dart';
 import 'package:test2/get_controllers/dropdown_controller.dart';
 import 'package:test2/get_controllers/image_controller.dart';
+import 'package:test2/get_controllers/page_controller.dart';
 import 'package:test2/get_controllers/radio_controller.dart';
 import 'package:test2/get_controllers/text_controller.dart';
+import 'package:test2/get_controllers/ui_model_controller.dart';
 import 'package:test2/models/checkbox_model.dart';
 import 'package:test2/models/condition_model.dart' as condition_model;
 import 'package:test2/models/dropdown_model.dart';
@@ -19,6 +21,7 @@ import 'package:test2/models/radio_model.dart';
 import 'package:test2/models/short_text_model.dart';
 import 'package:test2/models/ui_model.dart';
 import 'package:test2/utilities/common_widgets.dart';
+import 'package:test2/utilities/hive_crud.dart';
 
 class UtilityWidgets {
   late RadioController radioValueController = Get.find<RadioController>();
@@ -27,6 +30,8 @@ class UtilityWidgets {
   late CheckboxController checkboxController = Get.find<CheckboxController>();
   late ImageController imageController = Get.find<ImageController>();
   late TextController textController = Get.find<TextController>();
+  late UIModelController uiModelController = Get.find<UIModelController>();
+  late CurrentPageController pageController = Get.find<CurrentPageController>();
 
   initFields(UiModel uiModel) {
     /// initialise list of all Types
@@ -647,5 +652,106 @@ class UtilityWidgets {
           });
         },
         child: Text("Select Location"));
+  }
+
+  /// Submit
+  submit() {
+
+    int totalPage = pageController.totalPage.value;
+    try
+    {
+      for(int i = 0 ; i < totalPage ; i++)
+      {
+        for (int j = 0;
+        j <
+            uiModelController.uiModel.value!.fields!
+                .elementAt(0)
+                .page!
+                .elementAt(i)
+                .lists!
+                .length;
+        j++) {
+          int id = uiModelController.uiModel.value!.fields!
+              .elementAt(0)
+              .page!
+              .elementAt(i)
+              .lists!
+              .elementAt(j)
+              .id!;
+          switch (uiModelController.uiModel.value!.fields!
+              .elementAt(0)
+              .page!
+              .elementAt(i)
+              .lists!
+              .elementAt(j)
+              .type) {
+            case Constants.text:
+              {
+                HiveHelper().insert({
+                  id : textController.editTextList[id]!
+                }) ;
+              }
+              break;
+            case Constants.radio:
+              {
+                Map<int , String> val = {};
+                val = radioValueController.radioValue[id]!;
+                HiveHelper().insert({
+                  id : {
+                    val.keys.first : val.values.first
+                  }
+                }) ;
+              }
+              break;
+            case Constants.checkBox:
+              {
+                Map<int , dynamic>? val = {};
+                val = checkboxController.checkboxValue[id];
+
+                Map<int , dynamic> x = {};
+                val?.forEach((key, value) {
+                  x.addAll({
+                    key : value
+                  });
+                });
+
+                HiveHelper().insert({
+                  id : val
+                }) ;
+              }
+              break;
+            case Constants.dropDown:
+              {
+                Map<int , dynamic>? val = {};
+                val = dropDownValueController.dropDownValue[id];
+                HiveHelper().insert({
+                  id : {
+                    val?.keys.first : val?.values.first
+                  }
+                }) ;
+              }
+              break;
+            case Constants.image:
+              {
+
+              }
+              break;
+            default:
+              {}
+          }
+        }
+      }
+   }
+    catch(e)
+    {
+      CommonWidgets.printLog("Error ${e.toString()}");
+    }
+
+    fetchData();
+  }
+
+  fetchData()
+  {
+    HiveHelper().read();
   }
 }

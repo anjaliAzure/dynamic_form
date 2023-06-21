@@ -1,13 +1,17 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:test2/app_constants/constants.dart';
 import 'package:test2/get_controllers/page_controller.dart';
 import 'package:test2/get_controllers/selected_file_controller.dart';
 import 'package:test2/get_controllers/ui_model_controller.dart';
+import 'package:test2/models/checkbox_model.dart';
+import 'package:test2/models/dropdown_model.dart';
+import 'package:test2/models/image_model.dart';
+import 'package:test2/models/radio_model.dart';
 import 'package:test2/utilities/common_widgets.dart';
 import 'package:test2/utilities/hive_crud.dart';
 import 'package:test2/utilities/utility_widgets.dart';
-
 import '../get_controllers/checkbox_controller.dart';
 import '../get_controllers/dropdown_controller.dart';
 import '../get_controllers/image_controller.dart';
@@ -102,7 +106,7 @@ class _UserFormState extends State<UserForm> {
     }
   }
 
-  verifyAndSubmit({isSubmit = false}) {
+  verify({isSubmit = false}) {
 
     bool isValidated = true;
     int i = pageController.currentPage.value;
@@ -131,7 +135,7 @@ class _UserFormState extends State<UserForm> {
             .type) {
           case Constants.text:
             {
-              log("Text is ${textController.editTextList[i]}");
+              CommonWidgets.printLog("Text is ${textController.editTextList[i]}");
             }
             break;
           case Constants.radio:
@@ -148,6 +152,7 @@ class _UserFormState extends State<UserForm> {
                   isValidated = false;
                   radioValueController.setRadioVisible(id, true);
                 } else {
+                  isValidated = true;
                   radioValueController.setRadioVisible(id, false);
                 }
               }
@@ -170,6 +175,7 @@ class _UserFormState extends State<UserForm> {
               }
               if (checkboxModel.validation!.minCheck! <= selectedCount &&
                   selectedCount <= checkboxModel.validation!.maxCheck!) {
+                isValidated = true;
                 checkboxController.setCheckBoxVisible(id, false);
               } else {
                 isValidated = false;
@@ -192,6 +198,7 @@ class _UserFormState extends State<UserForm> {
                   isValidated = false;
                   dropDownValueController.setDropDownVisible(id, true);
                 } else {
+                  isValidated = true;
                   dropDownValueController.setDropDownVisible(id, false);
                 }
               }
@@ -210,19 +217,19 @@ class _UserFormState extends State<UserForm> {
                   isValidated = false;
                   imageController.setImageVisible(id, true);
                 } else {
+                  isValidated = true;
                   imageController.setImageVisible(id, false);
                 }
               }
             }
             break;
           default:
-            log("");
+            {}
         }
       }
 
 
     if (_formKey.currentState!.validate() && isValidated) {
-      CommonWidgets.showToast("ok");
       if(!isSubmit)
         {
           pageController.setCurrentPage(
@@ -230,7 +237,7 @@ class _UserFormState extends State<UserForm> {
         }
       else
       {
-         /// Call the APi
+        UtilityWidgets().submit();
       }
     }
   }
@@ -267,7 +274,7 @@ class _UserFormState extends State<UserForm> {
                                   1
                           ? ElevatedButton(
                               onPressed: () {
-                                 verifyAndSubmit(isSubmit: true);
+                                 verify(isSubmit: true);
                               },
                               child: const Text("Submit"))
                           : Container())
@@ -306,7 +313,7 @@ class _UserFormState extends State<UserForm> {
                           pageController.totalPage.value - 1,
                       child: ElevatedButton(
                           onPressed: () {
-                            verifyAndSubmit();
+                            verify();
                           },
                           child: const Text("Next")),
                     ))
