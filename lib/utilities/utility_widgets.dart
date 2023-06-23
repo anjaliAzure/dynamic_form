@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:test2/app_constants/constants.dart';
 import 'package:test2/app_screens/fetch_location.dart';
 import 'package:test2/get_controllers/checkbox_controller.dart';
@@ -418,52 +419,52 @@ class UtilityWidgets {
         .elementAt(idx)['id'];
 
     return Obx(() => Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            for (int i = 0; i < checkBoxModel.values!.length; i++)
-              Visibility(
-                visible: checkCondition(
-                    currentId: id,
-                    currentType: Constants.checkBox,
-                    isDependent: checkBoxModel.dependent ?? false,
-                    conditionValue:
-                    checkBoxModel.values!.elementAt(i).cond ?? [],
-                    page: page,
-                    uiModel: uiModel,
-                    currentModel: checkBoxModel),
-                child: Row(
-                  children: [
-                    Checkbox(
-                      checkColor: Colors.white,
-                      activeColor: Colors.blue,
-                      value: checkboxController.checkboxValue[id]!.values
-                          .elementAt(i),
-                      onChanged: (bool? value) {
-                        checkboxController.setCheckBoxValue(id, i, value);
-                      },
+            Row(
+              children: [
+                for (int i = 0; i < checkBoxModel.values!.length; i++)
+                  Visibility(
+                    visible: checkCondition(
+                        currentId: id,
+                        currentType: Constants.checkBox,
+                        isDependent: checkBoxModel.dependent ?? false,
+                        conditionValue:
+                            checkBoxModel.values!.elementAt(i).cond ?? [],
+                        page: page,
+                        uiModel: uiModel,
+                        currentModel: checkBoxModel),
+                    child: Row(
+                      children: [
+                        Checkbox(
+                          checkColor: Colors.white,
+                          activeColor: Colors.blue,
+                          value: checkboxController.checkboxValue[id]!.values
+                              .elementAt(i),
+                          onChanged: (bool? value) {
+                            checkboxController.setCheckBoxValue(id, i, value);
+                          },
+                        ),
+                        Text(checkBoxModel.values!.elementAt(i).value!)
+                      ],
                     ),
-                    Text(checkBoxModel.values!.elementAt(i).value!)
-                  ],
-                ),
-              )
-          ],
-        ),
-        Visibility(
-          visible: checkboxController.checkBoxVisible[id]!,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
-            child: Text(
-              "Please Choose between ${checkBoxModel.validation!.minCheck!} to ${checkBoxModel.validation!.maxCheck!}",
-              style: const TextStyle(color: Colors.red),
+                  )
+              ],
             ),
-          ),
-        )
-      ],
-    ));
+            Visibility(
+              visible: checkboxController.checkBoxVisible[id]!,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(10, 0, 0, 0),
+                child: Text(
+                  "Please Choose between ${checkBoxModel.validation!.minCheck!} to ${checkBoxModel.validation!.maxCheck!}",
+                  style: const TextStyle(color: Colors.red),
+                ),
+              ),
+            )
+          ],
+        ));
   }
 
   /// Image
@@ -656,21 +657,18 @@ class UtilityWidgets {
 
   /// Submit
   submit() {
-
     int totalPage = pageController.totalPage.value;
-    try
-    {
-      for(int i = 0 ; i < totalPage ; i++)
-      {
+    try {
+      for (int i = 0; i < totalPage; i++) {
         for (int j = 0;
-        j <
-            uiModelController.uiModel.value!.fields!
-                .elementAt(0)
-                .page!
-                .elementAt(i)
-                .lists!
-                .length;
-        j++) {
+            j <
+                uiModelController.uiModel.value!.fields!
+                    .elementAt(0)
+                    .page!
+                    .elementAt(i)
+                    .lists!
+                    .length;
+            j++) {
           int id = uiModelController.uiModel.value!.fields!
               .elementAt(0)
               .page!
@@ -687,71 +685,71 @@ class UtilityWidgets {
               .type) {
             case Constants.text:
               {
-                HiveHelper().insert({
-                  id : textController.editTextList[id]!
-                }) ;
+                HiveHelper().insert({id: textController.editTextList[id]!});
               }
               break;
             case Constants.radio:
               {
-                Map<int , String> val = {};
+                Map<int, String> val = {};
                 val = radioValueController.radioValue[id]!;
                 HiveHelper().insert({
-                  id : {
-                    val.keys.first : val.values.first
-                  }
-                }) ;
+                  id: {val.keys.first: val.values.first}
+                });
               }
               break;
             case Constants.checkBox:
               {
-                Map<int , dynamic>? val = {};
+                Map<int, dynamic>? val = {};
                 val = checkboxController.checkboxValue[id];
 
-                Map<int , dynamic> x = {};
+                Map<int, dynamic> x = {};
                 val?.forEach((key, value) {
-                  x.addAll({
-                    key : value
-                  });
+                  x.addAll({key: value});
                 });
 
-                HiveHelper().insert({
-                  id : val
-                }) ;
+                HiveHelper().insert({id: val});
               }
               break;
             case Constants.dropDown:
               {
-                Map<int , dynamic>? val = {};
+                Map<int, dynamic>? val = {};
                 val = dropDownValueController.dropDownValue[id];
                 HiveHelper().insert({
-                  id : {
-                    val?.keys.first : val?.values.first
-                  }
-                }) ;
+                  id: {val?.keys.first: val?.values.first}
+                });
               }
               break;
             case Constants.image:
-              {
-
-              }
+              {}
               break;
             default:
               {}
           }
         }
       }
-   }
-    catch(e)
-    {
+    } catch (e) {
       CommonWidgets.printLog("Error ${e.toString()}");
     }
 
     fetchData();
   }
 
-  fetchData()
-  {
-    HiveHelper().read();
+  fetchData() async {
+    //if (await askStoragePermission()) {
+    HiveHelper().read(isWrite: true);
+    // }
+  }
+
+  Future<bool> askStoragePermission() async {
+    Map<Permission, PermissionStatus> statuses = await [
+      Permission.storage,
+    ].request();
+    if (!(await Permission.storage.isGranted)) {
+      if (await Permission.storage.request() == PermissionStatus.granted) {
+        return true;
+      }
+      return false;
+    }
+    return true;
   }
 }
