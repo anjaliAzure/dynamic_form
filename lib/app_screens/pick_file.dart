@@ -78,7 +78,7 @@ class _PickFileState extends State<PickFile> {
                 onPressed: () {
                   pickFile();
                 },
-                child: const Text("Browse")),
+                child: const Text("Browse")) ,
             const Text("or"),
             ElevatedButton(
                 onPressed: () {

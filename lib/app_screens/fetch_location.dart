@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
@@ -19,6 +20,8 @@ class _FetchLocationState extends State<FetchLocation> {
       Completer<GoogleMapController>();
   late Position currentPosition;
   Set<Marker> markers = {};
+  Set<Polyline> polyline = {};
+  Set<Polygon> polygons = {};
 
   static const CameraPosition _kGooglePlex = CameraPosition(
     target: LatLng(23.42796133580664, 73.085749655962),
@@ -33,13 +36,27 @@ class _FetchLocationState extends State<FetchLocation> {
   }
 
   Future fetchCurrentLocation() async {
+
+      polygons.add(
+        Polygon(polygonId: PolygonId("Polygon") ,
+          fillColor: Colors.transparent,
+          strokeColor: Colors.black12,
+          strokeWidth: 2,
+          points: [
+            LatLng(23.009423232090906, 72.59673934665193),
+            LatLng(23.00928497708458, 72.60456791181915),
+            LatLng(23.00333871274201, 72.60478349699757),
+            LatLng(23.003145298412463, 72.59597147637538)
+          ]
+        )
+      );
     if (await askPermission()) {
       currentPosition = await Geolocator.getCurrentPosition();
       final GoogleMapController controller = await _controller.future;
       await controller.animateCamera(CameraUpdate.newCameraPosition(
           CameraPosition(
               target:
-                  LatLng(currentPosition.latitude, currentPosition.longitude),
+                  LatLng(23.009423232090906, 72.59673934665193),
               zoom: 14)));
 
       setState(() {});
@@ -61,9 +78,12 @@ class _FetchLocationState extends State<FetchLocation> {
   addMarker(LatLng latLng) {
     markers.clear();
     markers.add(Marker(
+        onDragEnd: (latlng){
+          log(" *** ${latLng.latitude} - ${latLng.longitude}");
+        },
         markerId: MarkerId(latLng.toString()),
         position: LatLng(latLng.latitude, latLng.longitude)));
-    setState(() {});
+    //setState(() {});
   }
 
   @override
@@ -88,6 +108,17 @@ class _FetchLocationState extends State<FetchLocation> {
             addMarker(latLng);
             CommonWidgets.showToast("Location marked !");
           },
+          onCameraIdle: (){
+            setState(() {
+
+            });
+          },
+          onCameraMove: (position){
+            log("- ${position.target.latitude} - ${position.target.longitude}");
+              addMarker(LatLng(position.target.latitude , position.target.longitude));
+          },
+          polylines : polyline,
+          polygons: polygons,
           markers: markers,
           mapType: MapType.normal,
           initialCameraPosition: _kGooglePlex,
