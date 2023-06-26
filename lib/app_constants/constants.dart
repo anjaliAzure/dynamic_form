@@ -16,4 +16,5 @@ class Constants {
   static const dropDown = "dropDown";
   static const image = "image";
   static const location = "location";
+  static const signature = "signature";
 }

@@ -1,25 +1,19 @@
 {
-  "no_of_fields": 19,
+  "no_of_fields": 20,
   "fields": [
     {
       "page": [
         {
           "page_no": 1,
           "lists": [
-            {
-              "type": "text",
-              "id": 0,
-              "ob": {
-                "label": "Enter Name",
-                "validation": {
-                  "content_type": "email / password / phone",
-                  "input_type": "text / number ",
-                  "length": [
-                    2,
-                    10
-                  ]
-                }
-              }
+             {
+               "type" : "signature",
+               "id" : 0,
+               "ob" :
+               {
+                 "label" : "Please add your signature",
+                 "dependent" : true
+               }
             },
             {
               "type": "text",
@@ -565,6 +559,15 @@
                "dependent" : false,
                "is_place" : true,
                "is_current" : false
+             }
+            },
+            {
+             "type" : "signature",
+             "id" : 19,
+             "ob" :
+             {
+               "label" : "Please add your signature",
+               "dependent" : true
              }
             }
           ]

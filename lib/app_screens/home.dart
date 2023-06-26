@@ -1,4 +1,5 @@
 import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:test2/app_constants/constants.dart';
@@ -12,6 +13,7 @@ import 'package:test2/models/radio_model.dart';
 import 'package:test2/utilities/common_widgets.dart';
 import 'package:test2/utilities/hive_crud.dart';
 import 'package:test2/utilities/utility_widgets.dart';
+
 import '../get_controllers/checkbox_controller.dart';
 import '../get_controllers/dropdown_controller.dart';
 import '../get_controllers/image_controller.dart';
@@ -90,6 +92,12 @@ class _UserFormState extends State<UserForm> {
                   selectedFileController.selectedJson.value,
                   uiModelController.uiModel.value!,
                   context);
+            case Constants.signature:
+              return UtilityWidgets().buildSignature(
+                  pageController.currentPage.value,
+                  i,
+                  selectedFileController.selectedJson.value,
+                  uiModelController.uiModel.value!);
             default:
               return Container();
           }
@@ -107,136 +115,130 @@ class _UserFormState extends State<UserForm> {
   }
 
   verify({isSubmit = false}) {
-
     bool isValidated = true;
     int i = pageController.currentPage.value;
     for (int j = 0;
-      j <
-          uiModelController.uiModel.value!.fields!
-              .elementAt(0)
-              .page!
-              .elementAt(i)
-              .lists!
-              .length;
-      j++) {
-        int id = uiModelController.uiModel.value!.fields!
-            .elementAt(0)
-            .page!
-            .elementAt(i)
-            .lists!
-            .elementAt(j)
-            .id!;
-        switch (uiModelController.uiModel.value!.fields!
-            .elementAt(0)
-            .page!
-            .elementAt(i)
-            .lists!
-            .elementAt(j)
-            .type) {
-          case Constants.text:
-            {
-              CommonWidgets.printLog("Text is ${textController.editTextList[i]}");
-            }
-            break;
-          case Constants.radio:
-            {
-              RadioModel radioModel = RadioModel.fromJson(jsonDecode(
-                  selectedFileController.selectedJson.value)['fields']
-                  .elementAt(0)["page"]
-                  .elementAt(i)["lists"]
-                  .elementAt(j)['ob']);
-              if (radioModel.validation!.isMandatory != null &&
-                  radioModel.validation!.isMandatory!) {
-                if (radioValueController.radioValue[id]!.values.elementAt(0) ==
-                    "null") {
-                  isValidated = false;
-                  radioValueController.setRadioVisible(id, true);
-                } else {
-                  isValidated = true;
-                  radioValueController.setRadioVisible(id, false);
-                }
-              }
-            }
-            break;
-          case Constants.checkBox:
-            {
-              int selectedCount = 0;
-              CheckBoxModel checkboxModel = CheckBoxModel.fromJson(jsonDecode(
-                  selectedFileController.selectedJson.value)['fields']
-                  .elementAt(0)["page"]
-                  .elementAt(i)["lists"]
-                  .elementAt(j)['ob']);
-              for (int index = 0;
-              index < checkboxController.checkboxValue[id]!.length;
-              index++) {
-                if (checkboxController.checkboxValue[id]![index] == true) {
-                  selectedCount++;
-                }
-              }
-              if (checkboxModel.validation!.minCheck! <= selectedCount &&
-                  selectedCount <= checkboxModel.validation!.maxCheck!) {
-                isValidated = true;
-                checkboxController.setCheckBoxVisible(id, false);
-              } else {
+        j <
+            uiModelController.uiModel.value!.fields!
+                .elementAt(0)
+                .page!
+                .elementAt(i)
+                .lists!
+                .length;
+        j++) {
+      int id = uiModelController.uiModel.value!.fields!
+          .elementAt(0)
+          .page!
+          .elementAt(i)
+          .lists!
+          .elementAt(j)
+          .id!;
+      switch (uiModelController.uiModel.value!.fields!
+          .elementAt(0)
+          .page!
+          .elementAt(i)
+          .lists!
+          .elementAt(j)
+          .type) {
+        case Constants.text:
+          {
+            CommonWidgets.printLog("Text is ${textController.editTextList[i]}");
+          }
+          break;
+        case Constants.radio:
+          {
+            RadioModel radioModel = RadioModel.fromJson(
+                jsonDecode(selectedFileController.selectedJson.value)['fields']
+                    .elementAt(0)["page"]
+                    .elementAt(i)["lists"]
+                    .elementAt(j)['ob']);
+            if (radioModel.validation!.isMandatory != null &&
+                radioModel.validation!.isMandatory!) {
+              if (radioValueController.radioValue[id]!.values.elementAt(0) ==
+                  "null") {
                 isValidated = false;
-                checkboxController.setCheckBoxVisible(id, true);
+                radioValueController.setRadioVisible(id, true);
+              } else {
+                isValidated = true;
+                radioValueController.setRadioVisible(id, false);
               }
             }
-            break;
-          case Constants.dropDown:
-            {
-              DropDownModel dropDownModel = DropDownModel.fromJson(jsonDecode(
-                  selectedFileController.selectedJson.value)['fields']
-                  .elementAt(0)["page"]
-                  .elementAt(i)["lists"]
-                  .elementAt(j)['ob']);
-              if (dropDownModel.validation!.isMandatory != null &&
-                  dropDownModel.validation!.isMandatory!) {
-                if (dropDownValueController.dropDownValue[id]!.values
-                    .elementAt(0) ==
-                    null) {
-                  isValidated = false;
-                  dropDownValueController.setDropDownVisible(id, true);
-                } else {
-                  isValidated = true;
-                  dropDownValueController.setDropDownVisible(id, false);
-                }
+          }
+          break;
+        case Constants.checkBox:
+          {
+            int selectedCount = 0;
+            CheckBoxModel checkboxModel = CheckBoxModel.fromJson(
+                jsonDecode(selectedFileController.selectedJson.value)['fields']
+                    .elementAt(0)["page"]
+                    .elementAt(i)["lists"]
+                    .elementAt(j)['ob']);
+            for (int index = 0;
+                index < checkboxController.checkboxValue[id]!.length;
+                index++) {
+              if (checkboxController.checkboxValue[id]![index] == true) {
+                selectedCount++;
               }
             }
-            break;
-          case Constants.image:
-            {
-              ImageModel imageModel = ImageModel.fromJson(jsonDecode(
-                  selectedFileController.selectedJson.value)['fields']
-                  .elementAt(0)["page"]
-                  .elementAt(i)["lists"]
-                  .elementAt(j)['ob']);
-              if (imageModel.validation!.isMandatory != null &&
-                  imageModel.validation!.isMandatory!) {
-                if (imageController.imageFileList[id]!.path == "") {
-                  isValidated = false;
-                  imageController.setImageVisible(id, true);
-                } else {
-                  isValidated = true;
-                  imageController.setImageVisible(id, false);
-                }
+            if (checkboxModel.validation!.minCheck! <= selectedCount &&
+                selectedCount <= checkboxModel.validation!.maxCheck!) {
+              isValidated = true;
+              checkboxController.setCheckBoxVisible(id, false);
+            } else {
+              isValidated = false;
+              checkboxController.setCheckBoxVisible(id, true);
+            }
+          }
+          break;
+        case Constants.dropDown:
+          {
+            DropDownModel dropDownModel = DropDownModel.fromJson(
+                jsonDecode(selectedFileController.selectedJson.value)['fields']
+                    .elementAt(0)["page"]
+                    .elementAt(i)["lists"]
+                    .elementAt(j)['ob']);
+            if (dropDownModel.validation!.isMandatory != null &&
+                dropDownModel.validation!.isMandatory!) {
+              if (dropDownValueController.dropDownValue[id]!.values
+                      .elementAt(0) ==
+                  null) {
+                isValidated = false;
+                dropDownValueController.setDropDownVisible(id, true);
+              } else {
+                isValidated = true;
+                dropDownValueController.setDropDownVisible(id, false);
               }
             }
-            break;
-          default:
-            {}
-        }
+          }
+          break;
+        case Constants.image:
+          {
+            ImageModel imageModel = ImageModel.fromJson(
+                jsonDecode(selectedFileController.selectedJson.value)['fields']
+                    .elementAt(0)["page"]
+                    .elementAt(i)["lists"]
+                    .elementAt(j)['ob']);
+            if (imageModel.validation!.isMandatory != null &&
+                imageModel.validation!.isMandatory!) {
+              if (imageController.imageFileList[id]!.path == "") {
+                isValidated = false;
+                imageController.setImageVisible(id, true);
+              } else {
+                isValidated = true;
+                imageController.setImageVisible(id, false);
+              }
+            }
+          }
+          break;
+        default:
+          {}
       }
-
+    }
 
     if (_formKey.currentState!.validate() && isValidated) {
-      if(!isSubmit)
-        {
-          pageController.setCurrentPage(
-              pageController.currentPage.value + 1);
-        }
-      else
-      {
+      if (!isSubmit) {
+        pageController.setCurrentPage(pageController.currentPage.value + 1);
+      } else {
         UtilityWidgets().submit();
       }
     }
@@ -274,7 +276,7 @@ class _UserFormState extends State<UserForm> {
                                   1
                           ? ElevatedButton(
                               onPressed: () {
-                                 verify(isSubmit: true);
+                                verify(isSubmit: true);
                               },
                               child: const Text("Submit"))
                           : Container())

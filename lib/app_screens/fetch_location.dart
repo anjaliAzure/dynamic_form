@@ -36,27 +36,23 @@ class _FetchLocationState extends State<FetchLocation> {
   }
 
   Future fetchCurrentLocation() async {
-
-      polygons.add(
-        Polygon(polygonId: PolygonId("Polygon") ,
-          fillColor: Colors.transparent,
-          strokeColor: Colors.black12,
-          strokeWidth: 2,
-          points: [
-            LatLng(23.009423232090906, 72.59673934665193),
-            LatLng(23.00928497708458, 72.60456791181915),
-            LatLng(23.00333871274201, 72.60478349699757),
-            LatLng(23.003145298412463, 72.59597147637538)
-          ]
-        )
-      );
+    polygons.add(const Polygon(
+        polygonId: PolygonId("Polygon"),
+        fillColor: Colors.transparent,
+        strokeColor: Colors.black12,
+        strokeWidth: 2,
+        points: [
+          LatLng(23.009423232090906, 72.59673934665193),
+          LatLng(23.00928497708458, 72.60456791181915),
+          LatLng(23.00333871274201, 72.60478349699757),
+          LatLng(23.003145298412463, 72.59597147637538)
+        ]));
     if (await askPermission()) {
       currentPosition = await Geolocator.getCurrentPosition();
       final GoogleMapController controller = await _controller.future;
       await controller.animateCamera(CameraUpdate.newCameraPosition(
-          CameraPosition(
-              target:
-                  LatLng(23.009423232090906, 72.59673934665193),
+          const CameraPosition(
+              target: LatLng(23.009423232090906, 72.59673934665193),
               zoom: 14)));
 
       setState(() {});
@@ -78,7 +74,7 @@ class _FetchLocationState extends State<FetchLocation> {
   addMarker(LatLng latLng) {
     markers.clear();
     markers.add(Marker(
-        onDragEnd: (latlng){
+        onDragEnd: (latlng) {
           log(" *** ${latLng.latitude} - ${latLng.longitude}");
         },
         markerId: MarkerId(latLng.toString()),
@@ -108,16 +104,15 @@ class _FetchLocationState extends State<FetchLocation> {
             addMarker(latLng);
             CommonWidgets.showToast("Location marked !");
           },
-          onCameraIdle: (){
-            setState(() {
-
-            });
+          onCameraIdle: () {
+            setState(() {});
           },
-          onCameraMove: (position){
+          onCameraMove: (position) {
             log("- ${position.target.latitude} - ${position.target.longitude}");
-              addMarker(LatLng(position.target.latitude , position.target.longitude));
+            addMarker(
+                LatLng(position.target.latitude, position.target.longitude));
           },
-          polylines : polyline,
+          polylines: polyline,
           polygons: polygons,
           markers: markers,
           mapType: MapType.normal,
@@ -130,7 +125,7 @@ class _FetchLocationState extends State<FetchLocation> {
           onPressed: () async {
             await fetchCurrentLocation();
           },
-          child: Icon(
+          child: const Icon(
             Icons.my_location,
             color: Colors.black,
           ),

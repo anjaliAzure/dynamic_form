@@ -1,10 +1,14 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
 
+import 'package:exif/exif.dart';
 import 'package:flutter/material.dart';
+import 'package:geoflutterfire2/geoflutterfire2.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:signature/signature.dart';
 import 'package:test2/app_constants/constants.dart';
 import 'package:test2/app_screens/fetch_location.dart';
 import 'package:test2/get_controllers/checkbox_controller.dart';
@@ -12,6 +16,7 @@ import 'package:test2/get_controllers/dropdown_controller.dart';
 import 'package:test2/get_controllers/image_controller.dart';
 import 'package:test2/get_controllers/page_controller.dart';
 import 'package:test2/get_controllers/radio_controller.dart';
+import 'package:test2/get_controllers/signature_controller.dart';
 import 'package:test2/get_controllers/text_controller.dart';
 import 'package:test2/get_controllers/ui_model_controller.dart';
 import 'package:test2/models/checkbox_model.dart';
@@ -20,6 +25,7 @@ import 'package:test2/models/dropdown_model.dart';
 import 'package:test2/models/image_model.dart';
 import 'package:test2/models/radio_model.dart';
 import 'package:test2/models/short_text_model.dart';
+import 'package:test2/models/signature_model.dart';
 import 'package:test2/models/ui_model.dart';
 import 'package:test2/utilities/common_widgets.dart';
 import 'package:test2/utilities/hive_crud.dart';
@@ -33,6 +39,9 @@ class UtilityWidgets {
   late TextController textController = Get.find<TextController>();
   late UIModelController uiModelController = Get.find<UIModelController>();
   late CurrentPageController pageController = Get.find<CurrentPageController>();
+  late SignatureControllers signatureControllers =
+      Get.find<SignatureControllers>();
+  late dynamic location = '';
 
   initFields(UiModel uiModel) {
     /// initialise list of all Types
@@ -77,6 +86,21 @@ class UtilityWidgets {
           case Constants.image:
             imageController.setImageFileList(element.id!, XFile(""));
             imageController.setImageVisible(element.id!, false);
+            break;
+          case Constants.signature:
+            signatureControllers.setSignatureImagePath(element.id!, '');
+            signatureControllers.controller[element.id!] = SignatureController(
+              penStrokeWidth: 1,
+              penColor: Colors.red,
+              exportBackgroundColor: Colors.transparent,
+              exportPenColor: Colors.black,
+              onDrawStart: () {
+                signatureControllers.takePic(element.id!);
+                log("====================== picture   ${signatureControllers.imagePath[element.id]!}");
+              },
+              onDrawEnd: () => log('onDrawEnd called!'),
+            );
+            signatureControllers.setSignatureVisible(element.id!, false);
             break;
         }
       }
@@ -532,6 +556,10 @@ class UtilityWidgets {
                                       );
                                       imageController.setImageFileList(
                                           id, pickedFile!);
+                                      _checkGPSData(id).then((value) {
+                                        location =
+                                            '${value?.latitude} ${value?.longitude}';
+                                      });
                                     },
                                     style: ButtonStyle(
                                         shape: MaterialStateProperty.all<
@@ -558,6 +586,10 @@ class UtilityWidgets {
                                       );
                                       imageController.setImageFileList(
                                           id, pickedFile!);
+                                      _checkGPSData(id).then((value) {
+                                        location =
+                                            '${value?.latitude} ${value?.longitude}';
+                                      });
                                     },
                                     style: ButtonStyle(
                                         shape: MaterialStateProperty.all<
@@ -609,13 +641,19 @@ class UtilityWidgets {
                                 border: Border.all(
                               color: Colors.black,
                             )),
-                            child: Image.file(
-                              File(imageController.imageFileList[id]!.path),
-                              errorBuilder: (BuildContext context, Object error,
-                                      StackTrace? stackTrace) =>
-                                  const Center(
-                                      child: Text(
-                                          'This image type is not supported')),
+                            child: Column(
+                              children: [
+                                Image.file(
+                                  File(imageController.imageFileList[id]!.path),
+                                  errorBuilder: (BuildContext context,
+                                          Object error,
+                                          StackTrace? stackTrace) =>
+                                      const Center(
+                                          child: Text(
+                                              'This image type is not supported')),
+                                ),
+                                Text('${location ?? ''}'),
+                              ],
                             ),
                           ),
                         ],
@@ -639,20 +677,90 @@ class UtilityWidgets {
   /// Location
   Widget buildLocation(int page, int idx, String responseTxt, UiModel uiModel,
       BuildContext context) {
-    return ElevatedButton(
-        onPressed: () {
-          Navigator.push(
-                  context, MaterialPageRoute(builder: (ctx) => FetchLocation()))
-              .then((value) {
-            if (value != null && value.isNotEmpty) {
-              CommonWidgets.showToast(
-                  "Current Location \n ${value[2].toStringAsFixed(3)}, ${value[3].toStringAsFixed(3)}");
-              CommonWidgets.showToast(
-                  "Marked Location \n ${value[0].toStringAsFixed(3)}, ${value[1].toStringAsFixed(3)}");
-            }
-          });
-        },
-        child: Text("Select Location"));
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
+      child: ElevatedButton(
+          onPressed: () {
+            Navigator.push(context,
+                    MaterialPageRoute(builder: (ctx) => const FetchLocation()))
+                .then((value) {
+              if (value != null && value.isNotEmpty) {
+                CommonWidgets.showToast(
+                    "Current Location \n ${value[2].toStringAsFixed(3)}, ${value[3].toStringAsFixed(3)}");
+                CommonWidgets.showToast(
+                    "Marked Location \n ${value[0].toStringAsFixed(3)}, ${value[1].toStringAsFixed(3)}");
+              }
+            });
+          },
+          child: const Text("Select Location")),
+    );
+  }
+
+  Widget buildSignature(
+      int page, int idx, String responseTxt, UiModel uiModel) {
+    /// idx is the index of the list
+    SignatureModel signatureModel = SignatureModel.fromJson(
+        jsonDecode(responseTxt)['fields']
+            .elementAt(0)["page"]
+            .elementAt(page)["lists"]
+            .elementAt(idx)['ob']);
+
+    /// id is the id of the field
+    int id = jsonDecode(responseTxt)['fields']
+        .elementAt(0)["page"]
+        .elementAt(page)["lists"]
+        .elementAt(idx)['id'];
+
+    return Obx(() => Padding(
+          padding: const EdgeInsets.fromLTRB(5, 5, 5, 5),
+          child: Column(
+            children: [
+              Row(
+                children: [
+                  const Expanded(child: SizedBox()),
+                  ElevatedButton(
+                    onPressed: () async {
+                      signatureControllers.controller[id]!.clear();
+                    },
+                    style: ButtonStyle(
+                        shape: MaterialStateProperty
+                            .all<RoundedRectangleBorder>(RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(18.0),
+                                side: const BorderSide(color: Colors.white)))),
+                    child: const Icon(Icons.cancel_outlined),
+                  ),
+                ],
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              Text('${signatureModel.label}'),
+              Signature(
+                controller: signatureControllers.controller[id]!,
+                height: 100,
+                width: 300,
+                backgroundColor: Colors.grey[300]!,
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+              Image.file(File(signatureControllers.imagePath[id]!)),
+              const SizedBox(
+                height: 10,
+              ),
+              Visibility(
+                visible: signatureControllers.signatureVisible[id]!,
+                child: const Padding(
+                  padding: EdgeInsets.fromLTRB(10, 0, 0, 0),
+                  child: Text(
+                    "Please add your signature",
+                    style: TextStyle(color: Colors.red),
+                  ),
+                ),
+              )
+            ],
+          ),
+        ));
   }
 
   /// Submit
@@ -751,5 +859,46 @@ class UtilityWidgets {
       return false;
     }
     return true;
+  }
+
+  Future<GeoFirePoint?> _checkGPSData(int i) async {
+    Map<String, IfdTag> imgTags = await readExifFromBytes(
+        File(imageController.imageFileList[i]!.path).readAsBytesSync());
+
+    if (imgTags.containsKey('GPS GPSLongitude')) {
+      //_imgHasLocation = true;
+      return exifGPSToGeoFirePoint(imgTags);
+    }
+    return null;
+  }
+
+  GeoFirePoint exifGPSToGeoFirePoint(Map<String, IfdTag> tags) {
+    final latitudeValue = tags['GPS GPSLatitude']!
+        .values
+        .toList()
+        .map<double>(
+            (item) => (item.numerator.toDouble() / item.denominator.toDouble()))
+        .toList();
+    final latitudeSignal = tags['GPS GPSLatitudeRef']!.printable;
+
+    final longitudeValue = tags['GPS GPSLongitude']!
+        .values
+        .toList()
+        .map<double>(
+            (item) => (item.numerator.toDouble() / item.denominator.toDouble()))
+        .toList();
+    final longitudeSignal = tags['GPS GPSLongitudeRef']!.printable;
+
+    double latitude =
+        latitudeValue[0] + (latitudeValue[1] / 60) + (latitudeValue[2] / 3600);
+
+    double longitude = longitudeValue[0] +
+        (longitudeValue[1] / 60) +
+        (longitudeValue[2] / 3600);
+
+    if (latitudeSignal == 'S') latitude = -latitude;
+    if (longitudeSignal == 'W') longitude = -longitude;
+
+    return GeoFirePoint(latitude, longitude);
   }
 }
