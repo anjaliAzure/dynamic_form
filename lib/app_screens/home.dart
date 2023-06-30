@@ -109,6 +109,7 @@ class _UserFormState extends State<UserForm> {
       UtilityWidgets().initFields(uiModelController.uiModel.value!);
       pageController.setTotalPage(
           uiModelController.uiModel.value!.fields!.elementAt(0).page!.length);
+      await UtilityWidgets().askStoragePermission();
     } catch (e) {
       CommonWidgets.showToast("Error ${e.toString()}");
     }

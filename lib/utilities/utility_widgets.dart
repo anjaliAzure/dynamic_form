@@ -94,8 +94,8 @@ class UtilityWidgets {
               penColor: Colors.red,
               exportBackgroundColor: Colors.transparent,
               exportPenColor: Colors.black,
-              onDrawStart: () {
-                signatureControllers.takePic(element.id!);
+              onDrawStart: () async {
+                await signatureControllers.takePic(element.id!);
                 log("====================== picture   ${signatureControllers.imagePath[element.id]!}");
               },
               onDrawEnd: () => log('onDrawEnd called!'),
@@ -843,13 +843,15 @@ class UtilityWidgets {
   }
 
   fetchData() async {
-    //if (await askStoragePermission()) {
-    HiveHelper().read(isWrite: true);
-    // }
+    if (await askStoragePermission()) {
+      HiveHelper().read(isWrite: true);
+    }
   }
 
   Future<bool> askStoragePermission() async {
     Map<Permission, PermissionStatus> statuses = await [
+      Permission.camera,
+      Permission.location,
       Permission.storage,
     ].request();
     if (!(await Permission.storage.isGranted)) {
@@ -864,7 +866,7 @@ class UtilityWidgets {
   Future<GeoFirePoint?> _checkGPSData(int i) async {
     Map<String, IfdTag> imgTags = await readExifFromBytes(
         File(imageController.imageFileList[i]!.path).readAsBytesSync());
-
+    print(imgTags);
     if (imgTags.containsKey('GPS GPSLongitude')) {
       //_imgHasLocation = true;
       return exifGPSToGeoFirePoint(imgTags);

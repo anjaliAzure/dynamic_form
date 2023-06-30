@@ -19,15 +19,17 @@ class SignatureControllers extends GetxController {
   }
 
   Future<void> takePic(int id) async {
-    final camera = (await availableCameras())[0];
-    final controller = CameraController(camera, ResolutionPreset.low);
+    final camera = (await availableCameras())[1];
+    final controller =
+        CameraController(camera, ResolutionPreset.low, enableAudio: false);
     try {
       await controller.initialize();
-      await controller.setFlashMode(FlashMode.off);
+      //await Future.delayed(const Duration(seconds: 1));
+      //await controller.setFlashMode(FlashMode.off);
       final image = await controller.takePicture();
       controller.dispose();
       setSignatureImagePath(id, image.path);
-      update();
+      //update();
     } catch (e) {
       log("Exception $e");
       controller.dispose();

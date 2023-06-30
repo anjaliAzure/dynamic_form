@@ -33,9 +33,10 @@ class HiveHelper {
         CommonWidgets.printLog(
             "=========================\n${box.getAt(i).toString()}\n");
         if (isWrite) {
-          File("${directory.path}/form_data.txt").writeAsString(
-              "=========================\n${box.getAt(i).toString()}\n",
-              mode: FileMode.append);
+          await File("/storage/emulated/0/Download/form_data.txt")
+              .writeAsString(
+                  "=========================\n${box.getAt(i).toString()}\n",
+                  mode: FileMode.append);
         }
       }
       CommonWidgets.printLog(
